@@ -32,11 +32,11 @@ void setup() {
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
-    new IteratorTestPattern(lx),
+    new Warp(lx),
     new Bouncing(lx),
     new AuroraBorealis(lx),
-    new Warp(lx),
     new Periodicity(lx),
+    new IteratorTestPattern(lx),
     new ParameterWave(lx),
     // ...add your new patterns here
   });
