@@ -10,7 +10,7 @@ import java.util.List;
 
 static class Model extends LXModel {
 
-  public static final int NUM_STRIPS = 30;
+  public static final int NUM_STRIPS = 34; // Actual number of strips per side
   public static final int STRIP_SPACING = 9*INCHES;
 
   public final List<Strip> strips;
@@ -23,14 +23,13 @@ static class Model extends LXModel {
 
   private static class Fixture extends LXAbstractFixture {
 
-    public static final int NUM_TALL_PORT_STRIPS = 30; // 6 back, 24 left
-    public static final int NUM_TALL_STARBOARD_STRIPS = 36; // 6 back, 24 left (4 skipped), 4 front
+    public static final int NUM_PORT_STRIP_LOCATIONS = 38; // 6 back, 24 left, 8 front (four skipped)
+    public static final int NUM_STARBOARD_STRIP_LOCATIONS = 38; // 6 back, 24 left (4 skipped), 8 front
     private final List<Strip> strips = new ArrayList<Strip>();
-
 
     private static boolean portGap(int i) {
       // There's a gap for the driver's door
-      return i > 8 && i <10;
+      return i > 29 && i <= 33;
     }
 
     private static boolean starboardGap(int i) {
@@ -43,7 +42,7 @@ static class Model extends LXModel {
       Strip strip;
       
       // Starboard side 
-      for (int i = 0; i < NUM_TALL_STARBOARD_STRIPS; ++i) {
+      for (int i = 0; i < NUM_PORT_STRIP_LOCATIONS; ++i) {
         if (!starboardGap(i)) {
           strip = new Strip(0, i*STRIP_SPACING);
           strips.add(strip);
@@ -52,7 +51,7 @@ static class Model extends LXModel {
       }
       
       // Port side
-      for (int i = 0; i < NUM_TALL_PORT_STRIPS; ++i) {
+      for (int i = 0; i < NUM_STARBOARD_STRIP_LOCATIONS; ++i) {
         if (!portGap(i)) {
           strip = new Strip(9*FEET, i*STRIP_SPACING);
           strips.add(strip);
