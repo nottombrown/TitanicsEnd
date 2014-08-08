@@ -113,6 +113,8 @@ void setup() {
   lx.ui.addLayer(new UIChannelControl(lx.ui, lx, 4, 4));
   lx.ui.addLayer(new UIBeatDetect(lx.ui, beat, 4, 326));
   lx.ui.addLayer(new UIOutputControl(lx.ui, output, 4, 518));
+
+  lx.engine.setThreaded(true);
 }
 
 void draw() {
