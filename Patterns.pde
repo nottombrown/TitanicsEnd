@@ -11,7 +11,7 @@ class Periodicity extends LXPattern {
     super(lx);
     for (int i = 0; i < pos.length; ++i) {
       pos[i] = new SinLFO(0, 1, 60*SECONDS / (float) i);  
-      addModulator(pos[i].start()); 
+      addModulator(pos[i]).start(); 
     }
   }
   

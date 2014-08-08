@@ -1,8 +1,9 @@
 // Imports!
 import heronarts.lx.*;
 import heronarts.lx.model.*;
-import heronarts.lx.ui.*;
-import heronarts.lx.ui.control.*;
+import heronarts.p2lx.*;
+import heronarts.p2lx.ui.*;
+import heronarts.p2lx.ui.control.*;
 import ddf.minim.*;
 
 // Useful constants
@@ -17,14 +18,14 @@ final static int OPC_PORT = 7890;
 
 // Global engine objects
 Model model;
-LX lx;
+P2LX lx;
 
 void setup() {
   // Processing config
   size(800, 600, OPENGL);
   
   // LX engine instance
-  lx = new LX(this, model = new Model());
+  lx = new P2LX(this, model = new Model());
   
   // Patterns
   final LXPattern[] patterns;
