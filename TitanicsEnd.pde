@@ -114,8 +114,8 @@ class CarWalls extends UICameraComponent {
     stroke(#555555);
     fill(#333333);
     pushMatrix();
-    translate(model.cx, model.cy, model.cz);
-    box(model.xRange + 3*FEET, model.yRange + 2*FEET, model.zRange * .9);
+    translate(model.cx, model.cy-1*FEET, model.cz);
+    box(model.xRange, model.yRange -2*FEET, model.zRange * .9);
     popMatrix(); 
   }
 }

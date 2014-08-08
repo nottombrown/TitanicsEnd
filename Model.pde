@@ -9,32 +9,32 @@ import java.util.Collections;
 import java.util.List;
 
 static class Model extends LXModel {
-  
+
   public static final int NUM_STRIPS = 24;
-  public static final int STRIP_SPACING = 8*INCHES;  
-  
+  public static final int STRIP_SPACING = 8*INCHES;
+
   public final List<Strip> strips;
-  
+
   Model() {
     super(new Fixture());
     Fixture f = (Fixture) fixtures.get(0);
     this.strips = Collections.unmodifiableList(f.strips);
   }
-  
+
   private static class Fixture extends LXAbstractFixture {
-    
+
     private final List<Strip> strips = new ArrayList<Strip>();
-    
+
     Fixture() {
       // Build an array of strips, from left to right
       Strip strip;
       for (int i = 0; i < NUM_STRIPS; ++i) {
-        strip = new Strip(0, i*STRIP_SPACING);  
+        strip = new Strip(0, i*STRIP_SPACING);
         strips.add(strip);
         addPoints(strip);
       }
       for (int i = 0; i < NUM_STRIPS; ++i) {
-        strip = new Strip(6*FEET, i*STRIP_SPACING);  
+        strip = new Strip(9*FEET, i*STRIP_SPACING);
         strips.add(strip);
         addPoints(strip);
       }
@@ -43,22 +43,22 @@ static class Model extends LXModel {
 }
 
 static class Strip extends LXModel {
-  
+
   public static final int NUM_POINTS = 100;
   public static final float POINT_SPACING = METER / 30.;
-  
+
   public final float x;
   public final float z;
-  
+
   Strip(float z, float x) {
     super(new Fixture(z, x));
     this.z = z;
     this.x = x;
   }
-  
+
   private static class Fixture extends LXAbstractFixture {
     Fixture(float z, float x) {
-      // Points in each strip are added from bottom to top 
+      // Points in each strip are added from bottom to top
       for (int i = 0; i < NUM_POINTS; ++i) {
         addPoint(new LXPoint(x, i*POINT_SPACING, z));
       }
