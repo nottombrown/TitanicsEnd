@@ -10,8 +10,8 @@ import java.util.List;
 
 static class Model extends LXModel {
 
-  public static final int NUM_STRIPS = 24;
-  public static final int STRIP_SPACING = 8*INCHES;
+  public static final int NUM_STRIPS = 30;
+  public static final int STRIP_SPACING = 9*INCHES;
 
   public final List<Strip> strips;
 
@@ -23,20 +23,41 @@ static class Model extends LXModel {
 
   private static class Fixture extends LXAbstractFixture {
 
+    public static final int NUM_TALL_PORT_STRIPS = 30; // 6 back, 24 left
+    public static final int NUM_TALL_STARBOARD_STRIPS = 36; // 6 back, 24 left (4 skipped), 4 front
     private final List<Strip> strips = new ArrayList<Strip>();
 
+
+    private static boolean portGap(int i) {
+      // There's a gap for the driver's door
+      return i > 8 && i <10;
+    }
+
+    private static boolean starboardGap(int i) {
+      // There's a gap for the stairs and ice-cavern entrance
+      return i > 5 && i <= 9;
+    }
+    
     Fixture() {
-      // Build an array of strips, from left to right
+      // Build an array of strips, from left to right, some will be skipped to make a gap
       Strip strip;
-      for (int i = 0; i < NUM_STRIPS; ++i) {
-        strip = new Strip(0, i*STRIP_SPACING);
-        strips.add(strip);
-        addPoints(strip);
+      
+      // Starboard side 
+      for (int i = 0; i < NUM_TALL_STARBOARD_STRIPS; ++i) {
+        if (!starboardGap(i)) {
+          strip = new Strip(0, i*STRIP_SPACING);
+          strips.add(strip);
+          addPoints(strip);
+        }
       }
-      for (int i = 0; i < NUM_STRIPS; ++i) {
-        strip = new Strip(9*FEET, i*STRIP_SPACING);
-        strips.add(strip);
-        addPoints(strip);
+      
+      // Port side
+      for (int i = 0; i < NUM_TALL_PORT_STRIPS; ++i) {
+        if (!portGap(i)) {
+          strip = new Strip(9*FEET, i*STRIP_SPACING);
+          strips.add(strip);
+          addPoints(strip);
+        }
       }
     }
   }

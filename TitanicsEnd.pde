@@ -13,11 +13,11 @@ final static int FEET = 12;
 final static int INCHES = 1;
 final static float METER = 39.37*INCHES;
 
-final static String FCSERVER_HOST = "127.0.0.1";
-final static int FCSERVER_PORT = 7890;
+final static String OPC_HOST = "127.0.0.1";
+final static int OPC_PORT = 7890;
 
-final static float VEHICLE_HEIGHT = 9.5*FEET;
-
+final static float CAR_BODY_HEIGHT = 9.5*FEET;
+final static float CAR_BODY_LENGTH = 16*FEET;
 // Global engine objects
 Model model;
 P2LX lx;
@@ -66,16 +66,8 @@ void setup() {
 
 
   // OPC Output
-  final FadecandyOutput output;
-  lx.addOutput(output = new FadecandyOutput(lx, FCSERVER_HOST, FCSERVER_PORT) {
-    protected void didConnect() {
-      super.didConnect();
-      println("Connected to fcserver");
-    }
-    protected void didDispose(Exception x) {
-      println("Closed connection to fcserver: " + x.getMessage());
-    }
-  });
+  final OPCOutput output;
+  lx.addOutput(output = new OPCOutput(lx, OPC_HOST, OPC_PORT));
   output.enabled.setValue(false);
 
   // UI layers
@@ -106,7 +98,7 @@ void draw() {
 
 static class UIOutputControl extends UIWindow {
   public UIOutputControl(UI ui, LXOutput output, float x, float y) {
-    super(ui, "OUTPUT (" + FCSERVER_HOST + ":" + FCSERVER_PORT + ")", x, y, UIChannelControl.DEFAULT_WIDTH, 72);
+    super(ui, "OUTPUT (" + OPC_HOST + ":" + OPC_PORT + ")", x, y, UIChannelControl.DEFAULT_WIDTH, 72);
     float yPos = UIWindow.TITLE_LABEL_HEIGHT;
     new UIButton(4, yPos, width - 8, 20)
     .setParameter(output.enabled)
@@ -121,12 +113,13 @@ static class UIOutputControl extends UIWindow {
 }
 
 class CarBodyWalls extends UICameraComponent {
+  
   protected void onDraw(UI ui) {
     stroke(#555555);
     fill(#333333);
     pushMatrix();
     translate(model.cx, model.cy-1*FEET, model.cz);
-    box(model.xRange, VEHICLE_HEIGHT, model.zRange * .9);
+    box(CAR_BODY_LENGTH, CAR_BODY_HEIGHT, model.zRange * .9);
     popMatrix();
   }
 }
@@ -137,21 +130,23 @@ class CarCabinWalls extends UICameraComponent {
   final static int ENGINE_HEIGHT = 5*FEET;
   
   float bodyBottom;
+  float bodyFront;
   
   protected void onDraw(UI ui) {
-    bodyBottom = model.cy - 1*FEET - VEHICLE_HEIGHT / 2;
+    bodyBottom = model.cy - 1*FEET - CAR_BODY_HEIGHT / 2;
+    bodyFront = model.cx + CAR_BODY_LENGTH/2;
     stroke(#555555);
     fill(#333333);
     
     // Cabin
     pushMatrix();
-    translate(model.xRange + CABIN_LENGTH/4, bodyBottom+CABIN_HEIGHT/2, model.cz);
+    translate(bodyFront + CABIN_LENGTH/4, bodyBottom+CABIN_HEIGHT/2, model.cz);
     box(CABIN_LENGTH/2, CABIN_HEIGHT, model.zRange * .9);
     popMatrix();
     
     // Engine
     pushMatrix();
-    translate(model.xRange + CABIN_LENGTH*3/4, bodyBottom+ENGINE_HEIGHT/2, model.cz);
+    translate(bodyFront + CABIN_LENGTH*3/4, bodyBottom+ENGINE_HEIGHT/2, model.cz);
     box(CABIN_LENGTH/2, ENGINE_HEIGHT, model.zRange * .9);
     popMatrix();
   }
