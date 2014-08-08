@@ -13,8 +13,8 @@ final static int FEET = 12;
 final static int INCHES = 1;
 final static float METER = 39.37*INCHES;
 
-final static String OPC_HOST = "127.0.0.1";
-final static int OPC_PORT = 7890;
+final static String FCSERVER_HOST = "127.0.0.1";
+final static int FCSERVER_PORT = 7890;
 
 // Global engine objects
 Model model;
@@ -64,8 +64,16 @@ void setup() {
 
   
   // OPC Output
-  final OPCOutput output;
-  lx.addOutput(output = new OPCOutput(lx, OPC_HOST, OPC_PORT));
+  final FadecandyOutput output;
+  lx.addOutput(output = new FadecandyOutput(lx, FCSERVER_HOST, FCSERVER_PORT) {
+    protected void didConnect() {
+      super.didConnect();
+      println("Connected to fcserver");
+    }
+    protected void didDispose(Exception x) {
+      println("Closed connection to fcserver: " + x.getMessage());
+    }
+  });
   output.enabled.setValue(false);
   
   // UI layers
@@ -95,7 +103,7 @@ void draw() {
 
 static class UIOutputControl extends UIWindow {
   public UIOutputControl(UI ui, LXOutput output, float x, float y) {
-    super(ui, "OUTPUT (" + OPC_HOST + ":" + OPC_PORT + ")", x, y, UIChannelControl.DEFAULT_WIDTH, 72);
+    super(ui, "OUTPUT (" + FCSERVER_HOST + ":" + FCSERVER_PORT + ")", x, y, UIChannelControl.DEFAULT_WIDTH, 72);
     float yPos = UIWindow.TITLE_LABEL_HEIGHT;
     new UIButton(4, yPos, width - 8, 20)
     .setParameter(output.enabled)
