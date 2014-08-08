@@ -16,6 +16,8 @@ final static float METER = 39.37*INCHES;
 final static String FCSERVER_HOST = "127.0.0.1";
 final static int FCSERVER_PORT = 7890;
 
+final static float VEHICLE_HEIGHT = 9.5*FEET;
+
 // Global engine objects
 Model model;
 P2LX lx;
@@ -23,10 +25,10 @@ P2LX lx;
 void setup() {
   // Processing config
   size(800, 600, OPENGL);
-  
+
   // LX engine instance
   lx = new P2LX(this, model = new Model());
-  
+
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
@@ -41,7 +43,7 @@ void setup() {
   for (LXPattern pattern : patterns) {
     pattern.setTransition(new DissolveTransition(lx).setDuration(1000));
   }
-  
+
   // Midi Control
   LXMidiInput qx25input = LXMidiSystem.matchInput(lx, "QX25");
   if (qx25input != null) {
@@ -49,20 +51,20 @@ void setup() {
       public void noteOn(LXMidiNoteOn noteOn) {
         println("noteOn:" + noteOn.getPitch());
       }
-      
+
       public void noteOff(LXMidiNoteOff noteOff) {
         println("noteOff:" + noteOff.getPitch());
       }
-      
+
       public void controlChange(LXMidiControlChange cc) {
         println("cc:" + cc.getCC() + ":" + cc.getValue());
       }
     };
-    
-  }
-  
 
-  
+  }
+
+
+
   // OPC Output
   final FadecandyOutput output;
   lx.addOutput(output = new FadecandyOutput(lx, FCSERVER_HOST, FCSERVER_PORT) {
@@ -75,7 +77,7 @@ void setup() {
     }
   });
   output.enabled.setValue(false);
-  
+
   // UI layers
   lx.ui.addLayer(new UICameraLayer(lx.ui) {
       protected void beforeDraw() {
@@ -90,7 +92,8 @@ void setup() {
     .setTheta(PI/12)
     .setPhi(-PI/24)
     .addComponent(new UIPointCloud(lx).setPointWeight(2))
-    .addComponent(new CarWalls())
+    .addComponent(new CarBodyWalls())
+    .addComponent(new CarCabinWalls())
   );
   lx.ui.addLayer(new UIChannelControl(lx.ui, lx, 4, 4));
   lx.ui.addLayer(new UIOutputControl(lx.ui, output, 4, 332));
@@ -109,7 +112,7 @@ static class UIOutputControl extends UIWindow {
     .setParameter(output.enabled)
     .setActiveLabel("Enabled")
     .setInactiveLabel("Disabled")
-    .addToContainer(this); 
+    .addToContainer(this);
     yPos += 24;
     new UISlider(4, yPos, width - 8, 20)
     .setParameter(output.brightness)
@@ -117,13 +120,39 @@ static class UIOutputControl extends UIWindow {
   }
 }
 
-class CarWalls extends UICameraComponent {
+class CarBodyWalls extends UICameraComponent {
   protected void onDraw(UI ui) {
     stroke(#555555);
     fill(#333333);
     pushMatrix();
     translate(model.cx, model.cy-1*FEET, model.cz);
-    box(model.xRange, model.yRange -2*FEET, model.zRange * .9);
-    popMatrix(); 
+    box(model.xRange, VEHICLE_HEIGHT, model.zRange * .9);
+    popMatrix();
+  }
+}
+
+class CarCabinWalls extends UICameraComponent {
+  final static int CABIN_LENGTH = 6*FEET;
+  final static int CABIN_HEIGHT = 7*FEET;
+  final static int ENGINE_HEIGHT = 5*FEET;
+  
+  float bodyBottom;
+  
+  protected void onDraw(UI ui) {
+    bodyBottom = model.cy - 1*FEET - VEHICLE_HEIGHT / 2;
+    stroke(#555555);
+    fill(#333333);
+    
+    // Cabin
+    pushMatrix();
+    translate(model.xRange + CABIN_LENGTH/4, bodyBottom+CABIN_HEIGHT/2, model.cz);
+    box(CABIN_LENGTH/2, CABIN_HEIGHT, model.zRange * .9);
+    popMatrix();
+    
+    // Engine
+    pushMatrix();
+    translate(model.xRange + CABIN_LENGTH*3/4, bodyBottom+ENGINE_HEIGHT/2, model.cz);
+    box(CABIN_LENGTH/2, ENGINE_HEIGHT, model.zRange * .9);
+    popMatrix();
   }
 }
