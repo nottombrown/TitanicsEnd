@@ -16,8 +16,10 @@ final static float METER = 39.37*INCHES;
 final static String OPC_HOST = "127.0.0.1";
 final static int OPC_PORT = 7890;
 
+// Car Components (used for rendering the model)
 final static float CAR_BODY_HEIGHT = 9.5*FEET;
 final static float CAR_BODY_LENGTH = 16*FEET;
+
 // Global engine objects
 Model model;
 P2LX lx;
