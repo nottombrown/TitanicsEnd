@@ -109,3 +109,53 @@ class ParameterWave extends LXPattern {
     }
   }
 }
+
+class AuroraBorealis extends LXPattern {
+  
+  final SinLFO yOffset = new SinLFO(0, 3*FEET, 3*SECONDS);
+  
+  AuroraBorealis(LX lx) {
+    super(lx);
+    addModulator(yOffset).start();
+  }
+  
+  public void run(double deltaMs) {
+    for (LXPoint p : model.points) {
+      colors[p.index] = lx.hsb(
+        (p.y + 2*FEET * sin(p.x/model.xRange * 4*PI) + yOffset.getValuef())/model.yRange * 180,
+        100,
+        100
+      );
+    }
+  }
+}
+
+class Bouncing extends LXPattern {
+  
+  final BasicParameter size = new BasicParameter("SIZE", 1*FEET, 1*FEET, 5*FEET);
+  final BasicParameter rate = new BasicParameter("RATE", 2*SECONDS, 1*SECONDS, 4*SECONDS);
+  final BasicParameter max = new BasicParameter("MAX", model.cy, model.cy, model.yMax);
+  final BasicParameter min = new BasicParameter("MIN", 0, 0, model.cy);
+  
+  final SinLFO py = new SinLFO(min, max, rate);
+  
+  Bouncing(LX lx) {
+    super(lx);
+    addParameter(size);
+    addParameter(rate);
+    addParameter(min);
+    addParameter(max);
+    addModulator(py).start();
+  }
+  
+  public void run(double deltaMs) {
+    for (LXPoint p : model.points) {
+      colors[p.index] = lx.hsb(
+        0,
+        100,
+        max(0, 100 - (100/size.getValuef()) * abs(p.y - py.getValuef()))
+      );
+    }
+  }
+}
+

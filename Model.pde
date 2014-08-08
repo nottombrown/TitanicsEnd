@@ -27,8 +27,14 @@ static class Model extends LXModel {
     
     Fixture() {
       // Build an array of strips, from left to right
+      Strip strip;
       for (int i = 0; i < NUM_STRIPS; ++i) {
-        Strip strip = new Strip(i*STRIP_SPACING);  
+        strip = new Strip(0, i*STRIP_SPACING);  
+        strips.add(strip);
+        addPoints(strip);
+      }
+      for (int i = 0; i < NUM_STRIPS; ++i) {
+        strip = new Strip(6*FEET, i*STRIP_SPACING);  
         strips.add(strip);
         addPoints(strip);
       }
@@ -42,17 +48,19 @@ static class Strip extends LXModel {
   public static final float POINT_SPACING = METER / 30.;
   
   public final float x;
+  public final float z;
   
-  Strip(float x) {
-    super(new Fixture(x));
+  Strip(float z, float x) {
+    super(new Fixture(z, x));
+    this.z = z;
     this.x = x;
   }
   
   private static class Fixture extends LXAbstractFixture {
-    Fixture(float x) {
+    Fixture(float z, float x) {
       // Points in each strip are added from bottom to top 
       for (int i = 0; i < NUM_POINTS; ++i) {
-        addPoint(new LXPoint(x, i*POINT_SPACING, 0));
+        addPoint(new LXPoint(x, i*POINT_SPACING, z));
       }
     }
   }

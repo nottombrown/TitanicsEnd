@@ -29,14 +29,38 @@ void setup() {
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
+    new IteratorTestPattern(lx),
+    new Bouncing(lx),
+    new AuroraBorealis(lx),
     new Warp(lx),
     new Periodicity(lx),
     new ParameterWave(lx),
     // ...add your new patterns here
   });
   for (LXPattern pattern : patterns) {
-    pattern.setTransition(new MultiplyTransition(lx).setDuration(3000));
+    pattern.setTransition(new DissolveTransition(lx).setDuration(1000));
   }
+  
+  // Midi Control
+  LXMidiInput qx25input = LXMidiSystem.matchInput(lx, "QX25");
+  if (qx25input != null) {
+    LXMidiDevice qx25 = new LXMidiDevice(qx25input) {
+      public void noteOn(LXMidiNoteOn noteOn) {
+        println("noteOn:" + noteOn.getPitch());
+      }
+      
+      public void noteOff(LXMidiNoteOff noteOff) {
+        println("noteOff:" + noteOff.getPitch());
+      }
+      
+      public void controlChange(LXMidiControlChange cc) {
+        println("cc:" + cc.getCC() + ":" + cc.getValue());
+      }
+    };
+    
+  }
+  
+
   
   // OPC Output
   final OPCOutput output;
@@ -53,10 +77,11 @@ void setup() {
       }
     }
     .setCenter(model.cx, model.cy, model.cz)
-    .setRadius(18*FEET)
+    .setRadius(22*FEET)
     .setTheta(PI/12)
     .setPhi(-PI/24)
     .addComponent(new UIPointCloud(lx).setPointWeight(2))
+    .addComponent(new CarWalls())
   );
   lx.ui.addLayer(new UIChannelControl(lx.ui, lx, 4, 4));
   lx.ui.addLayer(new UIOutputControl(lx.ui, output, 4, 332));
@@ -83,3 +108,13 @@ static class UIOutputControl extends UIWindow {
   }
 }
 
+class CarWalls extends UICameraComponent {
+  protected void onDraw(UI ui) {
+    stroke(#555555);
+    fill(#333333);
+    pushMatrix();
+    translate(model.cx, model.cy, model.cz);
+    box(model.xRange + 3*FEET, model.yRange + 2*FEET, model.zRange * .9);
+    popMatrix(); 
+  }
+}
