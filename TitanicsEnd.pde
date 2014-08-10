@@ -37,6 +37,7 @@ void setup() {
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
+    new Plasma(lx),
     new Warp(lx),
     new Bouncing(lx),
     new AuroraBorealis(lx),

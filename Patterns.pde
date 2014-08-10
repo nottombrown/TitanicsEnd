@@ -159,3 +159,37 @@ class Bouncing extends LXPattern {
   }
 }
 
+class Plasma extends LXPattern {
+  
+  final BasicParameter speed = new BasicParameter("SPEED", 1, 0.1, 10);
+  final BasicParameter hueSpread = new BasicParameter("SPREAD", 45, 0, 360);
+  final BasicParameter hueBase = new BasicParameter("BASE", 200, 0, 360);
+  
+  float time = 0.;
+
+  Plasma(LX lx) {
+    super(lx);
+    addParameter(speed);
+    addParameter(hueSpread);
+    addParameter(hueBase);
+  }
+  
+  public void run(double deltaMs) {
+    time += deltaMs * speed.getValuef();
+    float timeS = time / 1000.;
+    for (LXPoint p : model.points) {
+      float v1 = sin(p.x / 30. + timeS * 3.);
+      float v2 = sin(10 * sin(p.x / (model.cx * 2.) * sin(timeS / 2.) + p.y / (model.cx * 2.) * cos(timeS / 3.)) + timeS);
+      float cx = p.x / (model.cx * 2.) + 0.5 * sin(timeS / 2.);
+      float cy = p.y / (model.cx * 2.) + 0.5 * cos(timeS / 1.5);
+      float v3 = sin(sqrt(50. * (cx * cx + cy * cy) + 1.) + timeS);
+      float v = v1 + v2 + v3;
+      
+      colors[p.index] = lx.hsb(
+        max(0, min(360, sin(v) * hueSpread.getValuef() + hueBase.getValuef())),
+        100,
+        max(50, min(100, v * 25 + 50))
+      );
+    }
+  }
+}
