@@ -23,13 +23,21 @@ static class Model extends LXModel {
 
   private static class Fixture extends LXAbstractFixture {
 
-    public static final int NUM_PORT_STRIP_LOCATIONS = 38; // 6 back, 24 left, 8 front (four skipped)
-    public static final int NUM_STARBOARD_STRIP_LOCATIONS = 38; // 6 back, 24 left (4 skipped), 8 front
+    public static final int NUM_PORT_FRONT_STRIPS = 8; // 4 skipped for driver door
+    public static final int NUM_PORT_SIDE_STRIPS = 24;
+    public static final int NUM_PORT_BACK_STRIPS = 6;
+    public static final int NUM_PORT_STRIP_LOCATIONS = NUM_PORT_FRONT_STRIPS + NUM_PORT_SIDE_STRIPS + NUM_PORT_BACK_STRIPS;
+
+    public static final int NUM_STARBOARD_BACK_STRIPS = 6;
+    public static final int NUM_STARBOARD_SIDE_STRIPS = 24; // 4 skipped for ice cavern door
+    public static final int NUM_STARBOARD_FRONT_STRIPS = 8;
+    public static final int NUM_STARBOARD_STRIP_LOCATIONS = NUM_STARBOARD_BACK_STRIPS + NUM_STARBOARD_SIDE_STRIPS + NUM_STARBOARD_FRONT_STRIPS;
+
     private final List<Strip> strips = new ArrayList<Strip>();
 
     private static boolean portGap(int i) {
       // There's a gap for the driver's door
-      return i > 29 && i <= 33;
+      return i > 3 && i <= 7;
     }
 
     private static boolean starboardGap(int i) {
@@ -42,7 +50,7 @@ static class Model extends LXModel {
       Strip strip;
       
       // Starboard side 
-      for (int i = 0; i < NUM_PORT_STRIP_LOCATIONS; ++i) {
+      for (int i = 0; i < NUM_STARBOARD_STRIP_LOCATIONS; ++i) {
         if (!starboardGap(i)) {
           strip = new Strip(0, i*STRIP_SPACING);
           strips.add(strip);
@@ -51,9 +59,9 @@ static class Model extends LXModel {
       }
       
       // Port side
-      for (int i = 0; i < NUM_STARBOARD_STRIP_LOCATIONS; ++i) {
+      for (int i = 0; i < NUM_PORT_STRIP_LOCATIONS; ++i) {
         if (!portGap(i)) {
-          strip = new Strip(9*FEET, i*STRIP_SPACING);
+          strip = new Strip(9*FEET, (NUM_PORT_STRIP_LOCATIONS - 1 - i)*STRIP_SPACING);
           strips.add(strip);
           addPoints(strip);
         }
@@ -65,6 +73,7 @@ static class Model extends LXModel {
 static class Strip extends LXModel {
 
   public static final int NUM_POINTS = 100;
+  public static final int NUM_POINTS_PER_PART = NUM_POINTS / 2;
   public static final float POINT_SPACING = METER / 30.;
 
   public final float x;
@@ -78,9 +87,18 @@ static class Strip extends LXModel {
 
   private static class Fixture extends LXAbstractFixture {
     Fixture(float z, float x) {
+      /**
+       * Points in each strip are mapped in two sections: 
+       * - the first half are added middle to top
+       * - the second half are added middle to bottom
+       */
+      for (int i = 0; i < NUM_POINTS_PER_PART; ++i) {
+        addPoint(new LXPoint(x, (NUM_POINTS_PER_PART + i)*POINT_SPACING, z));
+      }
+
       // Points in each strip are added from bottom to top
-      for (int i = 0; i < NUM_POINTS; ++i) {
-        addPoint(new LXPoint(x, i*POINT_SPACING, z));
+      for (int i = 0; i < NUM_POINTS_PER_PART; ++i) {
+        addPoint(new LXPoint(x, (NUM_POINTS_PER_PART - 1 - i)*POINT_SPACING, z));
       }
     }
   }
