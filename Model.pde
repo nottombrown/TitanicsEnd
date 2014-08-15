@@ -25,10 +25,10 @@ static class Model extends LXModel {
 
     public static final int NUM_PORT_FRONT_STRIPS = 8; // 4 skipped for driver door
     public static final int NUM_PORT_SIDE_STRIPS = 24;
-    public static final int NUM_PORT_BACK_STRIPS = 6;
+    public static final int NUM_PORT_BACK_STRIPS = 12;
     public static final int NUM_PORT_STRIP_LOCATIONS = NUM_PORT_FRONT_STRIPS + NUM_PORT_SIDE_STRIPS + NUM_PORT_BACK_STRIPS;
 
-    public static final int NUM_STARBOARD_BACK_STRIPS = 6;
+    public static final int NUM_STARBOARD_BACK_STRIPS = 6;  // gone, but needed until we change the fcserver config starting #
     public static final int NUM_STARBOARD_SIDE_STRIPS = 24; // 4 skipped for ice cavern door
     public static final int NUM_STARBOARD_FRONT_STRIPS = 8;
     public static final int NUM_STARBOARD_STRIP_LOCATIONS = NUM_STARBOARD_BACK_STRIPS + NUM_STARBOARD_SIDE_STRIPS + NUM_STARBOARD_FRONT_STRIPS;
@@ -96,7 +96,6 @@ static class Strip extends LXModel {
         addPoint(new LXPoint(x, (NUM_POINTS_PER_PART + i)*POINT_SPACING, z));
       }
 
-      // Points in each strip are added from bottom to top
       for (int i = 0; i < NUM_POINTS_PER_PART; ++i) {
         addPoint(new LXPoint(x, (NUM_POINTS_PER_PART - 1 - i)*POINT_SPACING, z));
       }
