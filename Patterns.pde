@@ -18,15 +18,14 @@ class Periodicity extends LXPattern {
   public void run(double deltaMs) {
     int si = 0;
     for (Strip strip : model.strips) {
-      float pp = pos[si++].getValuef();
-      int pi = 0;
+      float pp = pos[si++ % Model.NUM_STRIPS].getValuef();
       for (LXPoint p : strip.points) {
+        float pi = p.y / model.yRange;
         colors[p.index] = lx.hsb(
           (lx.getBaseHuef() + dist(p.x, p.y, model.cx, model.cy) / model.xRange * 180) % 360,
           100,
-          max(0, 100 - 200*abs(pp - (pi / (float) Strip.NUM_POINTS))) 
+          max(0, 100 - 200*abs(pp - pi)) 
         );
-        ++pi;
       }
     }
   }
