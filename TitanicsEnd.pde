@@ -50,6 +50,10 @@ void setup() {
     pattern.setTransition(new DissolveTransition(lx).setDuration(1000));
   }
   
+  // Effects
+  final BeatMask beatMask;
+  lx.addEffect(beatMask = new BeatMask(lx));
+  
   // Audio detection
   GraphicEQ eq = new GraphicEQ(lx.audioInput(), 4);
   eq.attack.setValue(10);
@@ -114,7 +118,7 @@ void setup() {
   lx.ui.addLayer(new UIChannelControl(lx.ui, lx, 4, 4));
   lx.ui.addLayer(new UIBeatDetect(lx.ui, beat, 4, 326));
   lx.ui.addLayer(new UIOutputControl(lx.ui, output, 4, 518));
-
+  lx.ui.addLayer(new UIEffect(lx.ui, beatMask, width - 144, 4));
   lx.engine.setThreaded(true);
 }
 
@@ -125,7 +129,7 @@ void draw() {
 
 static class UIOutputControl extends UIWindow {
   public UIOutputControl(UI ui, LXOutput output, float x, float y) {
-    super(ui, "OUTPUT (" + FCSERVER_HOST + ":" + FCSERVER_PORT + ")", x, y, UIChannelControl.DEFAULT_WIDTH, 72);
+    super(ui, "OUTPUT (" + FCSERVER_HOST + ":" + FCSERVER_PORT + ")", x, y, UIChannelControl.WIDTH, 72);
     float yPos = UIWindow.TITLE_LABEL_HEIGHT;
     new UIButton(4, yPos, width - 8, 20)
     .setParameter(output.enabled)
@@ -175,6 +179,25 @@ class CarCabinWalls extends UICameraComponent {
     translate(bodyFront + CABIN_LENGTH*3/4, bodyBottom+ENGINE_HEIGHT/2, model.cz);
     box(CABIN_LENGTH/2, ENGINE_HEIGHT, model.zRange * .9);
     popMatrix();
+  }
+}
+
+static class UIEffect extends UIWindow {
+  UIEffect(UI ui, LXEffect effect, float x, float y) {
+    super(ui, effect.getClass().getSimpleName().toUpperCase(), x, y, 140, 72);
+    float yPos = 24;
+    float xPos = 4;
+    int i = 0;
+    for (LXParameter p : effect.getParameters()) {
+      if (p instanceof LXListenableNormalizedParameter) {
+        LXListenableNormalizedParameter parameter = (LXListenableNormalizedParameter) p;  
+        new UIKnob(xPos, yPos).setParameter(parameter).addToContainer(this);
+        xPos += 34;
+        if (++i > 4) {
+          break;
+        }
+      }
+    }
   }
 }
 
