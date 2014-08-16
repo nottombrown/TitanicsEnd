@@ -185,7 +185,7 @@ class Pulse extends LXPattern {
 }
 
 class Strobe extends LXPattern {
-  final BasicParameter speed = new BasicParameter("SPEED", 3, .3, 30);
+  final BasicParameter speed = new BasicParameter("SPEED", 6, .6, 60);
   float time = 0.;
 
   Strobe(LX lx) {
@@ -199,9 +199,9 @@ class Strobe extends LXPattern {
 
     for (LXPoint p : model.points) {
       colors[p.index] = lx.hsb(
-        42,
+        50,
         100,
-        100 * ((Math.round(timeS) % 2))
+        75 * ((Math.round(timeS) % 2))
       );
     }
   }
