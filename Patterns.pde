@@ -192,3 +192,191 @@ class Plasma extends LXPattern {
     }
   }
 }
+
+class BounceHigh extends LXPattern {
+  
+  final BasicParameter size = new BasicParameter("SIZE", 1*FEET, 1*FEET, 5*FEET);
+  final BasicParameter rate = new BasicParameter("RATE", 3*SECONDS, 1.5*SECONDS, 6*SECONDS);
+  final BasicParameter max = new BasicParameter("MAX", 1.9*model.cy, 1.9*model.cy, 1.9*model.yMax);
+  final BasicParameter min = new BasicParameter("MIN", 0, 0, model.cy);
+  
+  final SinLFO py = new SinLFO(min, max, rate);
+  
+  BounceHigh(LX lx) {
+    super(lx);
+    addParameter(size);
+    addParameter(rate);
+    addParameter(min);
+    addParameter(max);
+    addModulator(py).start();
+  }
+  
+  public void run(double deltaMs) {
+    for (LXPoint p : model.points) {
+      colors[p.index] = lx.hsb(
+        100,
+        100,
+        max(0, 100 - (100/size.getValuef()) * abs(p.y - py.getValuef()))
+      );
+    }
+  }
+}
+
+
+class BounceColor extends LXPattern {
+  
+  final BasicParameter size = new BasicParameter("SIZE", 1*FEET, 1*FEET, 5*FEET);
+  final BasicParameter rate = new BasicParameter("RATE", 3*SECONDS, 1.5*SECONDS, 6*SECONDS);
+  final BasicParameter max = new BasicParameter("MAX", 1.9*model.cy, 1.9*model.cy, 1.9*model.yMax);
+  final BasicParameter min = new BasicParameter("MIN", 0, 0, model.cy);
+  final BasicParameter xColor = new BasicParameter("X-COLOR", 0.5);
+  final BasicParameter yColor = new BasicParameter("Y-COLOR", 0.5);
+
+  final SinLFO py = new SinLFO(min, max, rate);
+  
+  BounceColor(LX lx) {
+    super(lx);
+    addParameter(size);
+    addParameter(rate);
+    addParameter(min);
+    addParameter(max);
+    addParameter(xColor);
+    addParameter(yColor);
+
+    addModulator(py).start();
+  }
+  
+  public void run(double deltaMs) {
+    for (LXPoint p : model.points) {
+      float hShift =
+        abs(p.x - model.cx) / model.xRange * 360 * xColor.getValuef() +
+        abs(p.y - model.cy) / model.yRange * 360 * yColor.getValuef();
+
+      hShift= 2*hShift;
+
+      colors[p.index] = lx.hsb(
+        (lx.getBaseHuef() + hShift + (p.x - model.cx)) % 360,
+        100,
+        max(0, 100 - (100/size.getValuef()) * abs(p.y - py.getValuef()))
+      );
+    }
+  }
+}
+
+class BounceCrazy extends LXPattern {
+  
+  final BasicParameter size = new BasicParameter("SIZE", 1*FEET, 1*FEET, 5*FEET);
+  final BasicParameter rate = new BasicParameter("RATE", 3*SECONDS, 1.5*SECONDS, 6*SECONDS);
+  final BasicParameter max = new BasicParameter("MAX", 1.9*model.cy, 1.9*model.cy, 1.9*model.yMax);
+  final BasicParameter min = new BasicParameter("MIN", 0, 0, model.cy);
+  final BasicParameter xColor = new BasicParameter("X-COLOR", 0.5);
+  final BasicParameter yColor = new BasicParameter("Y-COLOR", 0.5);
+
+  final SinLFO py = new SinLFO(min, max, rate);
+  
+  BounceCrazy(LX lx) {
+    super(lx);
+    addParameter(size);
+    addParameter(rate);
+    addParameter(min);
+    addParameter(max);
+    addParameter(xColor);
+    addParameter(yColor);
+
+    addModulator(py).start();
+  }
+  
+  public void run(double deltaMs) {
+    for (LXPoint p : model.points) {
+      float hShift =
+        abs(p.x - model.cx) / model.xRange * 360 * xColor.getValuef() +
+        abs(p.y - model.cy) / model.yRange * 360 * yColor.getValuef();
+
+      hShift= 4 * hShift;
+
+      colors[p.index] = lx.hsb(
+        (lx.getBaseHuef() + hShift + (p.x - model.cx)) % 360,
+        100,
+        max(0, hShift + 100 - (100/size.getValuef()) * abs(p.y - py.getValuef()))
+      );
+    }
+  }
+}
+
+
+
+class Cascade extends LXPattern {
+  
+  final BasicParameter size = new BasicParameter("SIZE", 1*FEET, 1*FEET, 5*FEET);
+  final BasicParameter rate = new BasicParameter("RATE", 3*SECONDS, 1.5*SECONDS, 6*SECONDS);
+  final BasicParameter max = new BasicParameter("MAX", 1.9*model.cy, 1.9*model.cy, 1.9*model.yMax);
+  final BasicParameter min = new BasicParameter("MIN", 0, 0, model.cy);
+  final BasicParameter xColor = new BasicParameter("X-COLOR", 0.5);
+  final BasicParameter yColor = new BasicParameter("Y-COLOR", 0.5);
+
+  final SinLFO py = new SinLFO(min, max, rate);
+  
+  Cascade(LX lx) {
+    super(lx);
+    addParameter(size);
+    addParameter(rate);
+    addParameter(min);
+    addParameter(max);
+    addParameter(xColor);
+    addParameter(yColor);
+
+    addModulator(py).start();
+  }
+  
+  public void run(double deltaMs) {
+    for (LXPoint p : model.points) {
+      float hShift =
+        abs(p.x - model.cx) / model.xRange * 360 * xColor.getValuef() +
+        abs(p.y - model.cy) / model.yRange * 360 * yColor.getValuef();
+      colors[p.index] = lx.hsb(
+        max(100,(lx.getBaseHuef() + hShift + (p.x - model.cx)) % 360),
+        100,
+        max(100,(lx.getBaseHuef() + hShift + (p.y - model.cy)) % 360)
+      );
+    }
+  }
+}
+
+class CascadeT extends LXPattern {
+  
+  final BasicParameter size = new BasicParameter("SIZE", 1*FEET, 1*FEET, 5*FEET);
+  final BasicParameter rate = new BasicParameter("RATE", 3*SECONDS, 1.5*SECONDS, 6*SECONDS);
+  final BasicParameter max = new BasicParameter("MAX", 1.9*model.cy, 1.9*model.cy, 1.9*model.yMax);
+  final BasicParameter min = new BasicParameter("MIN", 0, 0, model.cy);
+  final BasicParameter xColor = new BasicParameter("X-COLOR", 0.5);
+  final BasicParameter yColor = new BasicParameter("Y-COLOR", 0.5);
+
+  final SinLFO py = new SinLFO(min, max, rate);
+  
+  CascadeT(LX lx) {
+    super(lx);
+    addParameter(size);
+    addParameter(rate);
+    addParameter(min);
+    addParameter(max);
+    addParameter(xColor);
+    addParameter(yColor);
+
+    addModulator(py).start();
+  }
+  
+  public void run(double deltaMs) {
+    for (LXPoint p : model.points) {
+      float hShift =
+        abs(p.x - model.cx) / model.xRange * 360 * xColor.getValuef() +
+        abs(p.y - model.cy) / model.yRange * 360 * yColor.getValuef();
+      colors[p.index] = lx.hsb(
+        max(100,(lx.getBaseHuef() + hShift + (p.x - model.cx)) % 360),
+        180,
+        max(100,(lx.getBaseHuef() + hShift + (p.y - model.cy)) % 360)
+      );
+    }
+  }
+}
+
+

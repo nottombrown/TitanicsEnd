@@ -44,6 +44,11 @@ void setup() {
     new Periodicity(lx),
     new IteratorTestPattern(lx),
     new ParameterWave(lx),
+    new BounceHigh(lx),
+    new BounceColor(lx),
+    new BounceCrazy(lx),
+    new Cascade(lx),
+    new CascadeT(lx),
     // ...add your new patterns here
   });
   for (LXPattern pattern : patterns) {
