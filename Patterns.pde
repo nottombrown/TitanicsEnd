@@ -161,8 +161,31 @@ class Bouncing extends LXPattern {
 
 
 
-class Strobe extends LXPattern {
+class Pulse extends LXPattern {
   final BasicParameter speed = new BasicParameter("SPEED", 1, 0.1, 10);
+  float time = 0.;
+
+  Pulse(LX lx) {
+    super(lx);
+    addParameter(speed);
+  }
+  
+  public void run(double deltaMs) {
+    time += deltaMs * speed.getValuef();
+    float timeS = time / 1000.;
+
+    for (LXPoint p : model.points) {
+      colors[p.index] = lx.hsb(
+        40,
+        100,
+        100 * ((Math.round(timeS) % 2))
+      );
+    }
+  }
+}
+
+class Strobe extends LXPattern {
+  final BasicParameter speed = new BasicParameter("SPEED", 3, .3, 30);
   float time = 0.;
 
   Strobe(LX lx) {
@@ -176,7 +199,7 @@ class Strobe extends LXPattern {
 
     for (LXPoint p : model.points) {
       colors[p.index] = lx.hsb(
-        40,
+        42,
         100,
         100 * ((Math.round(timeS) % 2))
       );
