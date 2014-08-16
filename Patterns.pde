@@ -472,4 +472,139 @@ class CascadeT extends LXPattern {
   }
 }
 
+class FuzzyBeats extends LXPattern {
+  
+  final BasicParameter speed = new BasicParameter("SPEED", 1, 0.1, 10);
+  final BasicParameter xfreq = new BasicParameter("XFREQ", 10/1.5, 1, 100);
+  final BasicParameter yfreq = new BasicParameter("YFREQ", 4/1.5, 1, 100);
+  
+  final GraphicEQ eq = new GraphicEQ(lx.audioInput(), 4);
+
+  float time = 0;
+
+  FuzzyBeats(LX lx) {
+    super(lx);
+
+    addParameter(xfreq);
+    addParameter(yfreq);
+
+    eq.attack.setValue(10);
+    eq.release.setValue(250);
+    eq.range.setValue(14);
+    eq.gain.setValue(16);
+    addModulator(eq).start();  
+  }
+
+  public void run(double deltaMs) {
+    time += deltaMs * speed.getValuef();
+    float timeS = time / 1000.;
+
+    float zoom = eq.getAveragef(1, 4) + 0.4;
+    
+    for (LXPoint p : model.points) {
+      float x = (p.x - model.cx);
+      float y = (p.y - model.cy);
+      color bubbles1 = lx.hsb(
+        (180 + 20 * timeS * speed.getValuef()) % 360,
+        100.,
+        max(0, 100 * ((
+          1 + (
+              sin(PI * xfreq.getValuef() * x / model.xRange / zoom) * 
+              cos(PI * yfreq.getValuef() * y / model.yRange / zoom)
+          )
+        ) / 2))
+      );
+
+      color bubbles2 = lx.hsb(
+        (0 + 20 * timeS * speed.getValuef()) % 360,
+        100.,
+        max(0, 100 * ((
+          1 + (
+              sin(PI * xfreq.getValuef() * x / model.xRange / zoom) * 
+              cos(PI * yfreq.getValuef() * y / model.yRange / zoom)
+          )
+        ) / 2))
+      );
+      
+      colors[p.index] = bubbles1;
+      addColor(p.index, bubbles2);
+    }
+  }
+}
+
+class BubbleBeats extends LXPattern {
+  
+  final BasicParameter speed = new BasicParameter("SPEED", 1, 0.1, 10);
+  final BasicParameter baseSize = new BasicParameter("SIZE", 90, 60, 150);
+  final BasicParameter hueSpread = new BasicParameter("SPREAD", 90, 15, 120);
+  
+  final SawLFO baseHue = new SawLFO(0, 360, 20*SECONDS);
+  final SawLFO posOffset = new SawLFO(0, 1, 3*SECONDS);
+  
+  final GraphicEQ eq = new GraphicEQ(lx.audioInput(), 4);
+
+  PGraphics g;
+  
+  BubbleBeats(LX lx) {
+    super(lx);
+    addParameter(baseSize);
+    addParameter(hueSpread);
+    addModulator(baseHue).start();
+    addModulator(posOffset).start();
+  
+    eq.attack.setValue(10);
+    eq.release.setValue(250);
+    eq.range.setValue(14);
+    eq.gain.setValue(16);
+    addModulator(eq).start();
+  
+    g = createGraphics(int(model.xRange), int(model.yRange));
+  }
+
+  void drawBubbles(int startBand, float eqMult, float hue, float xOffs, float yOffs, float bubbleSize) {
+    float spacing = baseSize.getValuef();
+    float size = 1. + eq.getAveragef(startBand, 4) * eqMult;
+    
+    for (int y = -5; y < 5; y++) {
+      for (int x = -1; x < 10; x++) {
+        float xx = x + posOffset.getValuef();
+        g.fill(color(
+          (hue + baseHue.getValuef()) % 360, 
+          constrain(0, 100, 100 - size * 10), 
+          constrain(0, 100, 50 + size * 25)
+         ));
+        g.ellipse(
+          (xx + xOffs) * spacing, 
+          (y + yOffs) * spacing, 
+          spacing * bubbleSize * size, 
+          spacing * bubbleSize * size
+        );
+      }
+    }
+  }
+
+  public void run(double deltaMs) {
+    g.beginDraw();
+    g.background(0);
+    g.noStroke();
+    g.pushMatrix();
+    g.rotate(PI / 10.);
+    
+    drawBubbles(1, 1, 0, 0, 0, 1/2.);
+    drawBubbles(5, 2, hueSpread.getValuef(), 0.2, 0.4, 1/3.);
+    drawBubbles(9, 2, hueSpread.getValuef() * 2., 0.6, 0.3, 1/4.);
+    drawBubbles(13, 2.5, hueSpread.getValuef() * 3., 0.5, 0.7, 1/5.);
+
+    g.popMatrix();
+    g.endDraw();
+    
+    PImage img = g.get();
+    
+    for (LXPoint p : model.points) {
+      int ix = int(p.x / model.xRange * img.width); 
+      int iy = int(p.y / model.yRange * img.height); 
+      colors[p.index] = img.get(ix, iy);
+    }
+  }
+}
 

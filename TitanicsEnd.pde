@@ -37,6 +37,8 @@ void setup() {
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
+    new BubbleBeats(lx),
+    new FuzzyBeats(lx),
     new Plasma(lx),
     new Warp(lx),
     new Strobe(lx),
