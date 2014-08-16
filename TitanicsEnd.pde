@@ -47,6 +47,7 @@ void setup() {
     new ParameterWave(lx),
     new BounceHigh(lx),
     new BounceColor(lx),
+    new BounceArrow(lx),
     new BounceCrazy(lx),
     new Cascade(lx),
     new CascadeT(lx),
