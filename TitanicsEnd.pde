@@ -40,6 +40,7 @@ void setup() {
     new Plasma(lx),
     new Warp(lx),
     new Strobe(lx),
+    new Pulse(lx),
     new Bouncing(lx),
     new AuroraBorealis(lx),
     new Periodicity(lx),
