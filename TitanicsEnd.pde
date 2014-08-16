@@ -119,7 +119,7 @@ void setup() {
     .setCenter(model.cx, model.cy, model.cz)
     .setRadius(34*FEET)
     .setTheta(PI/6)
-    .addComponent(new UIGLPointCloud(lx).setPointWeight(2))
+    .addComponent(new UIPointCloud(lx).setPointWeight(2))
     .addComponent(new CarBodyWalls())
     .addComponent(new CarCabinWalls())
   );
