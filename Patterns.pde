@@ -158,6 +158,32 @@ class Bouncing extends LXPattern {
   }
 }
 
+
+
+
+class Strobe extends LXPattern {
+  final BasicParameter speed = new BasicParameter("SPEED", 1, 0.1, 10);
+  float time = 0.;
+
+  Strobe(LX lx) {
+    super(lx);
+    addParameter(speed);
+  }
+  
+  public void run(double deltaMs) {
+    time += deltaMs * speed.getValuef();
+    float timeS = time / 1000.;
+
+    for (LXPoint p : model.points) {
+      colors[p.index] = lx.hsb(
+        40,
+        100,
+        100 * ((Math.round(timeS) % 2))
+      );
+    }
+  }
+}
+
 class Plasma extends LXPattern {
   
   final BasicParameter speed = new BasicParameter("SPEED", 1, 0.1, 10);
