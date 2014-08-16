@@ -372,7 +372,7 @@ class CascadeT extends LXPattern {
         abs(p.y - model.cy) / model.yRange * 360 * yColor.getValuef();
       colors[p.index] = lx.hsb(
         max(100,(lx.getBaseHuef() + hShift + (p.x - model.cx)) % 360),
-        180,
+        30,
         max(100,(lx.getBaseHuef() + hShift + (p.y - model.cy)) % 360)
       );
     }
