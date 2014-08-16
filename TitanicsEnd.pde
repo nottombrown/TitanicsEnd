@@ -89,6 +89,15 @@ void setup() {
       
       public void controlChange(LXMidiControlChange cc) {
         println("cc:" + cc.getCC() + ":" + cc.getValue());
+        
+        // for custom pattern-specific controls (nothing coded yet)
+        lx.getPattern().controlChangeReceived(cc);
+        
+        int param = cc.getCC() - 14;
+        if (param >= 0 && param < 10) {
+          // assumes basic parameter
+          ((BasicParameter) lx.getPattern().getParameters().get(param)).setNormalized(cc.getValue() / 127.);
+        }
       }
     };
     
