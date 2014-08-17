@@ -17,7 +17,7 @@ class Periodicity extends LXPattern {
   
   public void run(double deltaMs) {
     int si = 0;
-    for (Strip strip : model.strips) {
+    for (LXModel strip : model.strips) {
       float pp = pos[si++ % Model.NUM_STRIPS].getValuef();
       for (LXPoint p : strip.points) {
         float pi = p.y / model.yRange;
