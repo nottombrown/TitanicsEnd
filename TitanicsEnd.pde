@@ -142,7 +142,7 @@ void setup() {
   lx.ui.addLayer(new UIBeatDetect(lx.ui, beat, 4, 326));
   lx.ui.addLayer(new UIOutputControl(lx.ui, output, 4, 518));
   lx.ui.addLayer(new UIEffect(lx.ui, beatMask, width - 144, 4));
-  lx.engine.setThreaded(true);
+  lx.engine.setThreaded(false);
 }
 
 void draw() {
