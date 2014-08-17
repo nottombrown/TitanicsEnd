@@ -1000,3 +1000,165 @@ class InfiniteSmileys extends LXPattern {
   }
 }
 
+public class Fire extends LXPattern {
+
+  final BasicParameter scaleX = new BasicParameter("XSCALE", 200, 1, 1000);
+  final BasicParameter scaleY = new BasicParameter("YSCALE", 250, 1, 1000);
+
+  final BasicParameter xNoiseScale = new BasicParameter("XNOISE", 0.01, 0.001, 1);
+  final BasicParameter yNoiseScale = new BasicParameter("YNOISE", 0.01, 0.001, 1);
+
+  final BasicParameter noiseBase = new BasicParameter("NOISE", 0, 0, 1000);
+  final BasicParameter noiseOctaves = new BasicParameter("OCT", 3, 1, 6);
+  final BasicParameter noiseWeight = new BasicParameter("WGHT", 0.6, 0, 1);
+  
+  PGraphics g;
+  PImage source, iceSource;
+  PImage disp;
+  float dispX = 0, dispY = 0;
+
+  int dispScale = 2;
+  int dispShift = 1;
+  
+  Fire(LX lx) {
+    super(lx);
+    createSource();
+    createIceSource();
+    g = createGraphics(int(model.xRange), int(model.yRange));
+
+    addParameter(scaleX);
+    addParameter(scaleY);
+
+    addParameter(xNoiseScale);
+    addParameter(yNoiseScale);
+
+    addParameter(noiseBase);
+    addParameter(noiseOctaves);
+    addParameter(noiseWeight);
+  }
+  
+  void drawGradientPart(PGraphics g, int y1, int y2, color c1, color c2) {
+    for (int i = y1; i <= y2; i++) {
+      float inter = map(i, y1, y2, 0, 1);
+      color c = lerpColor(c1, c2, inter);
+      g.stroke(c);
+      g.line(0, i, g.width, i);
+    }
+  }
+  
+  void drawGradient(PGraphics g, float[] ys, color[] cs) {
+    for (int i = 0; i < ys.length - 1; i++) {
+      drawGradientPart(g, int(ys[i] * g.height), int(ys[i+1] * g.height), cs[i], cs[i+1]);
+    }
+  }
+  
+  void createSource() {
+    PGraphics g = createGraphics(int(model.xRange), int(model.yRange));
+    g.beginDraw();
+    g.noFill();
+    drawGradient(g, new float[] {0, 0.4, 0.45, 0.5, 0.6, 0.8, 1}, new color[] {
+      color(0,0,0), 
+      color(0,0,30),
+      color(21,50,50),
+      color(21,100,100),
+      color(31,100,100),
+      color(50,70,100),
+      color(50,30,100)
+    });
+    g.endDraw();
+    source = g.get();
+    source.loadPixels();
+  }
+    
+  void createIceSource() {
+    PGraphics g = createGraphics(int(model.xRange), int(model.yRange));
+    g.beginDraw();
+    g.noFill();
+    drawGradient(g, new float[] {0, 0.4, 0.45, 0.5, 0.6, 0.8, 1}, new color[] {
+      color(261,0,0), 
+      color(261,30,30),
+      color(261,50,50),
+      color(261,100,100),
+      color(219,70,100),
+      color(197,70,100),
+      color(197,0,100)
+    });
+    g.endDraw();
+    iceSource = g.get();
+    iceSource.loadPixels();
+  }
+  
+  void createDisplacementMap() {
+    noiseDetail(int(noiseOctaves.getValuef()), noiseWeight.getValuef());
+    noiseSeed(int(noiseBase.getValuef()));
+
+    float xNoiseScaleF = xNoiseScale.getValuef();
+    float yNoiseScaleF = yNoiseScale.getValuef();
+  
+    PGraphics g = createGraphics(int((model.xRange + 1) / dispScale), int((model.yRange + 1) / dispScale));
+    g.beginDraw();
+    g.loadPixels();
+    for (int y = 0; y < g.height; y++) {
+      for (int x = 0; x < g.width; x++) {
+        g.pixels[y * g.width + x] = 
+          int(map(noise(dispX + (x << dispShift) * xNoiseScaleF, 0 + (y << dispShift) * yNoiseScaleF), 0, 1, 0, 255)) +  
+          (int(map(noise(dispX + (x << dispShift) * xNoiseScaleF, dispY + (y << dispShift) * yNoiseScaleF), 0, 1, 0, 255)) << 8) + 
+          (int(map(noise(dispX + (x << dispShift) * xNoiseScaleF, dispY + (y << dispShift) * yNoiseScaleF), 0, 1, 0, 255)) << 16) + 
+          (255 << 24);
+      }
+    }
+    g.updatePixels();
+    g.endDraw();
+    disp = g.get();
+    disp.loadPixels();
+  }
+
+  int beatNum = 0;
+
+  public void run(double deltaMs) {
+    dispX += 0.02;
+    dispY += 0.05;
+    createDisplacementMap();
+
+    float scaleXF = scaleX.getValuef();
+    float scaleYF = scaleY.getValuef();
+
+    if (beat.peak()) {
+      beatNum = (beatNum + 1) % 2;
+    }
+    float inc = beatNum == 0 ? beat.getValuef() * beat.getValuef() : 0;
+    
+    for (LXPoint p : model.points) {
+      int x = int(p.x);
+      int y = int(model.yRange - p.y);
+      if (x < 0) x = 0;
+      if (x >= source.width) x = source.width - 1;
+      if (y < 0) y = 0;
+      if (y >= source.height) y = source.height - 1;
+      int sx = int(
+          x + (
+            (
+              ((
+                disp.pixels[(y >> dispShift) * disp.width + (x >> dispShift)]
+              ) & 0xff) - 128
+            ) * scaleXF
+          ) / 256.
+        );
+      int sy = int(
+          y + (
+            (
+              (((disp.pixels[(y >> dispShift) * disp.width + (x >> dispShift)]) >> 8) & 0xff) - 
+              128
+            ) * scaleYF
+          ) / 256.
+        );
+      if (sx < 0) sx = 0;
+      if (sx >= source.width) sx = source.width - 1;
+      if (sy < 0) sy = 0;
+      if (sy >= source.height) sy = source.height - 1;
+      //float inc = eq.getAveragef(1, 4) > beatTrigger.getValuef() ? 1 : 0;
+      colors[p.index] = lerpColor(source.pixels[sy * source.width + sx], iceSource.pixels[sy * source.width + sy], inc);
+    }
+  }
+}
+
