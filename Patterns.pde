@@ -608,3 +608,121 @@ class BubbleBeats extends LXPattern {
   }
 }
 
+class Tunnel extends LXPattern {
+  
+  final BasicParameter speed = new BasicParameter("SPEED", 1, 0.1, 3);
+  final BasicParameter hueBase = new BasicParameter("HUE", 150, 0, 360);
+  final BasicParameter hueSpread = new BasicParameter("SPREAD", 60, 1, 360);
+
+  PGraphics g;
+  float a = 0;
+  float b = 0;
+  float c = 0;
+  float vx = 3;
+  float vy = 3;
+  
+  Tunnel(LX lx) {
+    super(lx);
+    addParameter(speed);
+    addParameter(hueBase);
+    addParameter(hueSpread);
+  
+    g = createGraphics(int(model.xRange), int(model.yRange));
+  }
+
+  public void run(double deltaMs) {
+    g.beginDraw();
+    g.background(0);
+    g.noFill();
+    g.pushMatrix();
+
+    int step = 15;
+    int maxIdx = int(g.width / step);
+    for (int i = 1; i < g.width; i += step) {
+      int idx = int(i / step);
+      g.fill(color(
+        (hueBase.getValuef() + idx + sin(idx + c) * hueSpread.getValuef()) % 360, 
+        100, 
+        constrain(200 * (1. * i / g.width), 0, 100)
+      ));
+
+      float moveMult = 6;
+      ring(
+        g.width / 2 + cos(a + (maxIdx - idx) * 0.08 * moveMult) * vx * (maxIdx - idx) * sin(a), 
+        g.height / 2 + sin(b + (maxIdx - idx) * 0.06 * moveMult) * vy * (maxIdx - idx) * cos(b), 
+        i, 
+        g.width / 2 + cos(a + (maxIdx - idx + 1) * 0.08 * moveMult) * vx * (maxIdx - idx + 1) * sin(a), 
+        g.height / 2 + sin(b + (maxIdx - idx + 1) * 0.06 * moveMult) * vy * (maxIdx - idx + 1) * cos(b),
+        max(0, i - (step + 1))
+      );
+    } 
+    
+    a += -0.03 / 2 * speed.getValuef();
+    b += -0.05 / 2 * speed.getValuef();
+    c += -0.05 * 2 * speed.getValuef();
+
+    g.popMatrix();
+    g.endDraw();
+    
+    PImage img = g.get();
+    
+    for (LXPoint p : model.points) {
+      int ix = int(p.x / model.xRange * img.width); 
+      int iy = int(p.y / model.yRange * img.height); 
+      colors[p.index] = img.get(ix, iy);
+    }
+  }
+  
+  // ring code from: http://processing.org/discourse/beta/num_1221179611.html
+  
+  // Create a ring by drawing an outer cicle clockwise and an inner circle anticlockwise.
+  void ring(float cx1, float cy1, float r1, float cx2, float cy2, float r2) {
+    g.beginShape();
+    buildCircle(cx1,cy1,r1,true);
+    buildCircle(cx2,cy2,r2,false); 
+    g.endShape();
+  }
+
+  // Creates a circle using spline curves. Can be drawn either clockwise
+  // which creates a solid circle, or anticlockwise that creates a hole.
+  void buildCircle(float cx, float cy, float r, boolean isClockwise) {
+    int numSteps = 5;
+    float inc = TWO_PI/numSteps;
+       
+    if (isClockwise)
+    {
+      // First control point should be penultimate point on circle.
+      g.curveVertex(cx+r*cos(-inc),cy+r*sin(-inc));
+      
+      for (float theta=0; theta<TWO_PI-0.01; theta+=inc)
+      {
+        g.curveVertex(cx+r*cos(theta),cy+r*sin(theta));
+      }
+      g.curveVertex(cx+r,cy);
+      
+      // Last control point should be second point on circle.
+      g.curveVertex(cx+r*cos(inc),cy+r*sin(inc));
+      
+      // Move to start position to keep curves in circle.
+      g.vertex(cx+r,cy);
+    }
+    else
+    {
+      // Move to start position to keep curves in circle.
+      g.vertex(cx+r,cy);
+      
+      // First control point should be penultimate point on circle.
+      g.curveVertex(cx+r*cos(inc),cy+r*sin(inc));
+          
+      for (float theta=TWO_PI; theta>0.01; theta-=inc)
+      {
+        g.curveVertex(cx+r*cos(theta),cy+r*sin(theta));
+      }
+      g.curveVertex(cx+r,cy);
+       
+      // Last control point should be second point on circle.
+      g.curveVertex(cx+r*cos(TWO_PI-inc),cy+r*sin(TWO_PI -inc));
+    }  
+  }
+}
+
