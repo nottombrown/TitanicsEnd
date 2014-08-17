@@ -6,6 +6,9 @@ import heronarts.p2lx.*;
 import heronarts.p2lx.ui.*;
 import heronarts.p2lx.ui.control.*;
 import ddf.minim.*;
+import processing.core.*;
+import oscP5.*; 
+import netP5.*;
 
 // Useful constants
 final static int SECONDS = 1000;
@@ -25,6 +28,14 @@ final static float CAR_BODY_LENGTH = 16*FEET;
 // Global engine objects
 Model model;
 P2LX lx;
+OscP5 oscP5;
+oscP5 = new OscP5(this,8000);
+private void oscEvent(OscMessage theOscMessage) { 
+/* print the address pattern and the typetag of the received OscMessage */ 
+print(" addrpattern: "+theOscMessage.addrPattern()); 
+println(" typetag: "+theOscMessage.typetag()); 
+}
+
 FrequencyGate beat;
 GraphicEQ eq;
 
