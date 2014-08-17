@@ -23,26 +23,23 @@ static class Model extends LXModel {
 
   private static class Fixture extends LXAbstractFixture {
 
-    public static final int NUM_PORT_FRONT_STRIPS = 0; // 4 skipped for driver door
     public static final int NUM_PORT_SIDE_STRIPS = 24;
     public static final int NUM_PORT_BACK_STRIPS = 12;
-    public static final int NUM_PORT_STRIP_LOCATIONS = NUM_PORT_FRONT_STRIPS + NUM_PORT_SIDE_STRIPS + NUM_PORT_BACK_STRIPS;
+    public static final int NUM_PORT_STRIP_LOCATIONS = NUM_PORT_SIDE_STRIPS + NUM_PORT_BACK_STRIPS;
 
-    public static final int NUM_STARBOARD_BACK_STRIPS = 6;  // gone, but needed until we change the fcserver config starting #
     public static final int NUM_STARBOARD_SIDE_STRIPS = 23; // 4 skipped for ice cavern door
-    public static final int NUM_STARBOARD_FRONT_STRIPS = 0;
-    public static final int NUM_STARBOARD_STRIP_LOCATIONS = NUM_STARBOARD_BACK_STRIPS + NUM_STARBOARD_SIDE_STRIPS + NUM_STARBOARD_FRONT_STRIPS;
+    public static final int NUM_STARBOARD_STRIP_LOCATIONS = NUM_STARBOARD_SIDE_STRIPS;
 
     private final List<LXModel> strips = new ArrayList<LXModel>();
 
     private static boolean portGap(int i) {
       // There's a gap for the driver's door
-      return i > 3 && i <= 7;
+      return i >= 0 && i <= 3;
     }
 
     private static boolean starboardGap(int i) {
       // There's a gap for the stairs and ice-cavern entrance
-      return i > 5 && i <= 9;
+      return i >= 0 && i <= 3;
     }
     
     Fixture() {
@@ -52,33 +49,33 @@ static class Model extends LXModel {
       // Starboard side 
       for (int i = 0; i < NUM_STARBOARD_STRIP_LOCATIONS; ++i) {
         if (!starboardGap(i)) {
-          strip = new VerticalStrip(0, i*STRIP_SPACING);
+          strip = new VerticalStrip(0, (NUM_PORT_BACK_STRIPS + i)*STRIP_SPACING);
           strips.add(strip);
           addPoints(strip);
         }
       }
 
       for (int i = 0; i < 4; i++) {
-        strip = new VerticalHalfStrip(0, (NUM_STARBOARD_STRIP_LOCATIONS + i)*STRIP_SPACING);
+        strip = new VerticalHalfStrip(0, (NUM_PORT_BACK_STRIPS + NUM_STARBOARD_STRIP_LOCATIONS + i)*STRIP_SPACING);
         strips.add(strip);
         addPoints(strip);
       }
 
       // Front of the car
       for (int i = 0; i < 3; i++) {
-        strip = new HorizontalStrip((NUM_STARBOARD_STRIP_LOCATIONS + 4)*STRIP_SPACING, (11 - i)*STRIP_SPACING, 0);
+        strip = new HorizontalStrip((NUM_PORT_BACK_STRIPS + NUM_STARBOARD_STRIP_LOCATIONS + 4)*STRIP_SPACING, (11 - i)*STRIP_SPACING, 0);
         strips.add(strip);
         addPoints(strip);
       }
 
       for (int i = 0; i < 4; i++) {
-        strip = new HorizontalStrip((NUM_STARBOARD_STRIP_LOCATIONS + 4)*STRIP_SPACING, (5 - i / 2.)*STRIP_SPACING, 0);
+        strip = new HorizontalStrip((NUM_PORT_BACK_STRIPS + NUM_STARBOARD_STRIP_LOCATIONS + 4)*STRIP_SPACING, (5 - i / 2.)*STRIP_SPACING, 0);
         strips.add(strip);
         addPoints(strip);
       }
 
       for (int i = 0; i < 4; i++) {
-        strip = new HorizontalStrip((NUM_STARBOARD_STRIP_LOCATIONS + 4)*STRIP_SPACING, (3 - i)*STRIP_SPACING, 0);
+        strip = new HorizontalStrip((NUM_PORT_BACK_STRIPS + NUM_STARBOARD_STRIP_LOCATIONS + 4)*STRIP_SPACING, (3 - i)*STRIP_SPACING, 0);
         strips.add(strip);
         addPoints(strip);
       }

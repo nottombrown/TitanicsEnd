@@ -163,11 +163,13 @@ static class UIOutputControl extends UIWindow {
 }
 
 class CarBodyWalls extends UICameraComponent {
+  final static int NUM_PORT_BACK_STRIPS = 12;
+
   protected void onDraw(UI ui) {
     stroke(#555555);
     fill(#333333);
     pushMatrix();
-    translate(model.cx, model.cy-1*FEET, model.cz);
+    translate(NUM_PORT_BACK_STRIPS * Model.STRIP_SPACING + CAR_BODY_LENGTH/2, model.cy-1*FEET, model.cz);
     box(CAR_BODY_LENGTH, CAR_BODY_HEIGHT, model.zRange * .9);
     popMatrix(); 
   }
@@ -177,13 +179,14 @@ class CarCabinWalls extends UICameraComponent {
   final static int CABIN_LENGTH = 6*FEET;
   final static int CABIN_HEIGHT = 7*FEET;
   final static int ENGINE_HEIGHT = 5*FEET;
+  final static int NUM_PORT_BACK_STRIPS = 12;
   
   float bodyBottom;
   float bodyFront;
   
   protected void onDraw(UI ui) {
     bodyBottom = model.cy - 1*FEET - CAR_BODY_HEIGHT / 2;
-    bodyFront = model.cx + CAR_BODY_LENGTH/2;
+    bodyFront = NUM_PORT_BACK_STRIPS * Model.STRIP_SPACING + CAR_BODY_LENGTH;
     stroke(#555555);
     fill(#333333);
     
