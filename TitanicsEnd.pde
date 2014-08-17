@@ -26,6 +26,7 @@ final static float CAR_BODY_LENGTH = 16*FEET;
 Model model;
 P2LX lx;
 FrequencyGate beat;
+GraphicEQ eq;
 
 void setup() {
   // Processing config
@@ -37,6 +38,7 @@ void setup() {
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
+    new Tribal(lx),
     new Tunnel(lx),
     new BubbleBeats(lx),
     new FuzzyBeats(lx),
@@ -66,7 +68,7 @@ void setup() {
   lx.addEffect(beatMask = new BeatMask(lx));
   
   // Audio detection
-  GraphicEQ eq = new GraphicEQ(lx.audioInput(), 4);
+  eq = new GraphicEQ(lx.audioInput(), 4);
   eq.attack.setValue(10);
   eq.release.setValue(250);
   eq.range.setValue(14);
