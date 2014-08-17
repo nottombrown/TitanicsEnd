@@ -185,7 +185,7 @@ class Pulse extends LXPattern {
 }
 
 class Strobe extends LXPattern {
-  final BasicParameter speed = new BasicParameter("SPEED", 6, .6, 60);
+  final BasicParameter speed = new BasicParameter("SPEED", 100, 1, 100);
   float time = 0.;
 
   Strobe(LX lx) {
