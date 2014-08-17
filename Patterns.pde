@@ -726,3 +726,140 @@ class Tunnel extends LXPattern {
   }
 }
 
+class Tribal extends LXPattern {
+
+  final int ringCount = 5;
+  
+  final BasicParameter hueBase = new BasicParameter("HUE", 0, 0, 360);
+  final BasicParameter hueSpread = new BasicParameter("SPREAD", 0, 0, 360);
+
+  final SawLFO hueRotate = new SawLFO(0, 360, 10*SECONDS);
+
+  final SawLFO[] ringSpin = new SawLFO[ringCount];
+  final SawLFO glowSpin = new SawLFO(0, 2*PI, 10*SECONDS);
+  final SawLFO glowMaskSpin = new SawLFO(0, 2*PI, 8*SECONDS);
+
+  int[][] rings = new int[ringCount][];
+  color[] ringColors = new color[ringCount];
+  float[] ringAngles = new float[ringCount];
+  
+  final int PORT_SIDE = 0;
+  final int STARBOARD_SIDE = 1;
+  float[] offsets = new float[] {8*FEET, 0};
+
+  float zoom = 0;
+    
+  Tribal(LX lx) {
+    super(lx);
+    addParameter(hueBase);
+    addParameter(hueSpread);
+
+    addModulator(hueRotate).start();
+    addModulator(glowSpin).start();
+    addModulator(glowMaskSpin).start();
+
+    float[] spinSpeeds = new float[] {5, -4, 3.5, 6, -8};     
+    for (int i = 0; i < ringCount; i++) {
+      ringSpin[i] = new SawLFO(0, 360, spinSpeeds[i]*SECONDS);
+      addModulator(ringSpin[i]).start();
+    }
+    
+    ringColors[0] = color(0, 81, 74);
+    rings[0] = new int[] {120, 150, 270};
+    ringColors[1] = color(313, 95, 74);
+    rings[1] = new int[] {180, 210};
+    ringColors[2] = color(207, 81, 74);
+    rings[2] = new int[] {200, 250, 300, 330, 359};
+    ringColors[3] = color(49, 81, 74);
+    rings[3] = new int[] {30, 60, 90, 260, 290};
+    ringColors[4] = color(167, 81, 74);
+    rings[4] = new int[] {300, 359, 60, 100, 140, 250};
+    
+    ringAngles = new float[] {0, 0, 0, 0, 0};
+  }
+
+  int side(LXPoint p) {
+    return p.z > 0 ? PORT_SIDE : STARBOARD_SIDE;
+  }
+
+  float centerX(LXPoint p) {
+    return model.cx + offsets[side(p)];
+  }
+
+  float centerY(LXPoint p) {
+    return model.cy;
+  }
+  
+  float modifyX(LXPoint p) {
+    if (side(p) == PORT_SIDE) {
+      return model.xMax - p.x;
+    }
+    else {
+      return p.x;
+    }
+  }
+
+  boolean isInRing(LXPoint p, int idx) {
+    float distance = dist(centerX(p), centerY(p), modifyX(p), p.y);
+    return distance >= (idx + 1) * 25 * zoom && distance <= (((idx + 1) * 25) + 14) * zoom; 
+  }
+
+  float fixAngle(float angle) {
+    while (angle < 0) angle += 2*PI;
+    while (angle > 2*PI) angle -= 2*PI;
+    return angle;
+  }
+  
+  boolean isDrawnInRing(LXPoint p, int idx) {
+    float angle = fixAngle(atan2(p.y - centerY(p), modifyX(p) - centerX(p)));
+    int[] ring = rings[idx];
+    for (int i = 0; i < ring.length; i++) {
+      float spaceAngle = fixAngle((ring[i] - ringSpin[idx].getValuef()) * PI / 180.);
+      float sliceAngle = 15 * (1 - idx / ringCount) * PI / 180.;
+      if (angle >= spaceAngle && angle <= spaceAngle + sliceAngle) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  float glowAt(float angle, float distance) {
+    float glowAngle = fixAngle(angle + glowSpin.getValuef());
+    float maskAngle = fixAngle(angle + glowMaskSpin.getValuef());
+    
+    float mask = constrain(cos(maskAngle*5), 0, 1);
+    float glow = constrain(sin(glowAngle*3), 0, 1) * mask * constrain(1. - distance / 200., 0, 1); 
+    float volume = eq.getAveragef(13, 4) * 3.;
+    return glow * volume;
+  }
+  
+  void addGlow(LXPoint p) {
+    float angle = fixAngle(atan2(p.y - centerY(p), modifyX(p) - centerX(p)));
+    float distance = dist(centerX(p), centerY(p), modifyX(p), p.y);
+    colors[p.index] = color(
+      hue(colors[p.index]), 
+      constrain(saturation(colors[p.index]) - constrain(glowAt(angle, distance)*100, 0, 100), 0, 100), 
+      constrain(brightness(colors[p.index]) + constrain(glowAt(angle, distance)*100, 0, 100), 0, 100)
+    );
+  } 
+
+  public void run(double deltaMs) {
+    zoom = constrain(eq.getAveragef(1, 4) + 0.8, 1, 3);
+    
+    for (LXPoint p : model.points) {
+      colors[p.index] = color(0, 0, 0);
+      for (int i = 0; i < rings.length; i++) {
+        if (isInRing(p, i) && isDrawnInRing(p, i)) {
+          colors[p.index] = color(
+            (hue(ringColors[i]) + hueBase.getValuef() + hueSpread.getValuef() * i + hueRotate.getValuef()) % 360,
+            saturation(ringColors[i]),
+            brightness(ringColors[i])
+          );
+        }
+      }
+      
+      addGlow(p);
+    }
+  }
+}
+

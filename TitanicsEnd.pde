@@ -38,6 +38,7 @@ void setup() {
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
+    new Tribal(lx),
     new Tunnel(lx),
     new BubbleBeats(lx),
     new FuzzyBeats(lx),
