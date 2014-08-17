@@ -633,7 +633,7 @@ class Tunnel extends LXPattern {
   public void run(double deltaMs) {
     g.beginDraw();
     g.background(0);
-    g.noFill();
+    g.noStroke();
     g.pushMatrix();
 
     int step = 15;
