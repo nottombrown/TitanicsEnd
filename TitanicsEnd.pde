@@ -37,6 +37,9 @@ void setup() {
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
+    new Tunnel(lx),
+    new BubbleBeats(lx),
+    new FuzzyBeats(lx),
     new Plasma(lx),
     new Warp(lx),
     new Strobe(lx),
@@ -89,6 +92,15 @@ void setup() {
       
       public void controlChange(LXMidiControlChange cc) {
         println("cc:" + cc.getCC() + ":" + cc.getValue());
+        
+        // for custom pattern-specific controls (nothing coded yet)
+        lx.getPattern().controlChangeReceived(cc);
+        
+        int param = cc.getCC() - 14;
+        if (param >= 0 && param < 10) {
+          // assumes basic parameter
+          ((BasicParameter) lx.getPattern().getParameters().get(param)).setNormalized(cc.getValue() / 127.);
+        }
       }
     };
     
@@ -152,11 +164,13 @@ static class UIOutputControl extends UIWindow {
 }
 
 class CarBodyWalls extends UICameraComponent {
+  final static int NUM_PORT_BACK_STRIPS = 12;
+
   protected void onDraw(UI ui) {
     stroke(#555555);
     fill(#333333);
     pushMatrix();
-    translate(model.cx, model.cy-1*FEET, model.cz);
+    translate(NUM_PORT_BACK_STRIPS * Model.STRIP_SPACING + CAR_BODY_LENGTH/2, model.cy-1*FEET, model.cz);
     box(CAR_BODY_LENGTH, CAR_BODY_HEIGHT, model.zRange * .9);
     popMatrix(); 
   }
@@ -166,13 +180,14 @@ class CarCabinWalls extends UICameraComponent {
   final static int CABIN_LENGTH = 6*FEET;
   final static int CABIN_HEIGHT = 7*FEET;
   final static int ENGINE_HEIGHT = 5*FEET;
+  final static int NUM_PORT_BACK_STRIPS = 12;
   
   float bodyBottom;
   float bodyFront;
   
   protected void onDraw(UI ui) {
     bodyBottom = model.cy - 1*FEET - CAR_BODY_HEIGHT / 2;
-    bodyFront = model.cx + CAR_BODY_LENGTH/2;
+    bodyFront = NUM_PORT_BACK_STRIPS * Model.STRIP_SPACING + CAR_BODY_LENGTH;
     stroke(#555555);
     fill(#333333);
     
