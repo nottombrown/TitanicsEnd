@@ -570,8 +570,8 @@ class BubbleBeats extends LXPattern {
         float xx = x + posOffset.getValuef();
         g.fill(color(
           (hue + baseHue.getValuef()) % 360, 
-          constrain(0, 100, 100 - size * 10), 
-          constrain(0, 100, 50 + size * 25)
+          constrain(100 - size * 10, 0, 100), 
+          constrain(50 + size * 25, 0, 100)
          ));
         g.ellipse(
           (xx + xOffs) * spacing, 
