@@ -38,6 +38,7 @@ void setup() {
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
+    new Logo(lx),
     new Fire(lx),
     new InfiniteSmileys(lx),
     new TextScroller(lx),

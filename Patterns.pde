@@ -1246,3 +1246,84 @@ public class TextScroller extends LXPattern {
   }
 }
 
+public class Logo extends LXPattern {
+
+  PGraphics g;
+  PImage ship, iceberg;
+  float shipX = 0;
+  float shipY = 0;
+  float shipAngle = 0;
+  boolean willSink = true;
+  
+  BasicParameter speed = new BasicParameter("SPEED", 5, 0, 20);
+  
+  Logo(LX lx) {
+    super(lx);
+    addParameter(speed);
+    
+    iceberg = loadImage("images/iceberg1b.png");
+    ship = loadImage("images/titanic.png");
+    
+    g = createGraphics(int(model.xRange), int(model.yRange));
+  }
+  
+  PImage drawImage() {
+    g.beginDraw();
+    g.background(color(0, 0, 0));
+    g.pushMatrix();
+    g.translate(0, 85);
+    g.scale(1, -1);
+    g.image(iceberg, 0, -100);
+    g.translate(shipX - ship.width, shipY);
+    g.translate(ship.width / 2, 0);
+    g.rotate(shipAngle);
+    g.translate(-ship.width / 2, 0);
+    g.image(ship, 0, 0);
+    g.popMatrix();
+    g.endDraw();
+    return g.get();
+  }
+
+  public void run(double deltaMs) {
+    boolean reset = false;
+    
+    if (willSink && shipX > model.cx) {
+      float deltaDist = (float) deltaMs / 100. * speed.getValuef();
+      shipAngle = constrain(shipAngle + (float) deltaMs / 10000. / 5 * speed.getValuef(), 0, PI/4);
+      shipX = shipX + deltaDist * cos(shipAngle);
+      shipY = shipY + deltaDist * sin(shipAngle);
+      if (shipY > sin(shipAngle) * ship.width) {
+        reset = true;
+      }
+    }
+    else {
+      shipX += (float) deltaMs / 100. * speed.getValuef();
+      if (shipX > model.xRange + ship.width) {
+        reset = true;
+      }
+    }
+    
+    if (reset) {
+      shipX = 0;
+      shipY = 0;
+      shipAngle = 0;
+      willSink = random(1) > 0.5;
+    }
+    
+    PImage img = drawImage();
+    
+    for (LXPoint p : model.points) {
+      int ix, iy;
+      if (p.z > 0) {
+        ix = int((model.xRange - p.x - 5*FEET) / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      else {
+        ix = int(p.x / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      colors[p.index] = img.get(ix, iy);
+    }
+  }
+}
+
