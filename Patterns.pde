@@ -1262,7 +1262,7 @@ public class Logo extends LXPattern {
     addParameter(speed);
     
     iceberg = loadImage("images/iceberg1b.png");
-    ship = loadImage("images/titanic.png");
+    ship = loadImage("images/titanic2.png");
     
     g = createGraphics(int(model.xRange), int(model.yRange));
   }
