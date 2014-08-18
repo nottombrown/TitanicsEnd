@@ -28,7 +28,7 @@ P2LX lx;
 FrequencyGate beat;
 GraphicEQ eq;
 
-// Global Amulet instance
+// Global 
 Amulet amulet = new Amulet();
 
 void setup() {
@@ -36,12 +36,14 @@ void setup() {
   size(800, 600, OPENGL);
   
   // LX engine instance
-  lx = new P2LX(this, model = new Model());
+  lx = new P2LX(this, model = new Model());  
+  
+  // Set up the amulet
+  amulet.setup();
   
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
-    new Heartbeat(lx),
     new Fire(lx),
     new InfiniteSmileys(lx),
     new TextScroller(lx),

@@ -2,21 +2,35 @@
 
 // This is meant to be used as a singleton and is instantiated in TitanicsEnd.pde
 class Amulet {
-  boolean heartbeatMode;
-  Amulet() {
-    heartbeatMode = false;
-  } 
+  BooleanParameter heartbeatMode;
+  LXPattern heartbeatPattern;
+  LXChannel amuletChannel;
+  Amulet() { } 
+  
+  void setup() {
+    heartbeatMode = new BooleanParameter("HEART", false);
+    
+    // Create a secret heartbeat channel
+   
+   final LXPattern[] patterns;
+   patterns = new LXPattern[] { 
+     new Heartbeat(lx)
+   };
+   amuletChannel = lx.engine.addChannel(patterns);
+  }
+  
 }
 
+// I don't like this global. Is there a way to listen for this from within the Amulet class?
 void keyPressed() {
   if(keyCode == 66) {
-    amulet.heartbeatMode = true;
+    amulet.heartbeatMode.setValue(true);
   }
 }
 
 void keyReleased() {
   if(keyCode == 66) {
-    amulet.heartbeatMode = false;
+    amulet.heartbeatMode.setValue(false);
   }
 }
 
@@ -101,6 +115,8 @@ class Heartbeat extends LXPattern {
     }
     xTranslate = xZoomTargets[currentSmiley]; 
     yTranslate = yZoomTargets[currentSmiley]; 
+
+    println(amulet.heartbeatMode);
 
   }
 
