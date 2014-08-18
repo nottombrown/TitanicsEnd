@@ -8,8 +8,7 @@ class Heartbeat extends LXPattern {
   float[] yZoomTargets;
   float[] targetZooms;
   float[] maxZooms;
-  color[] backgroundColors;
-  
+   
   int currentSmiley;
   float currentZoom;
   int nextSmiley;
@@ -23,6 +22,11 @@ class Heartbeat extends LXPattern {
   
   color backgroundColor;
   
+  BasicParameter minSize = new BasicParameter("SIZE", 1, 0, 10);
+  BasicParameter pulseDelta = new BasicParameter("PULSE", 1, 0, 10);
+  BasicParameter baseSaturation = new BasicParameter("SAT", 100, 0, 100);
+  BooleanParameter useBeat = new BooleanParameter("BEAT", true);
+  
   Heartbeat(LX lx) {
     super(lx);
     
@@ -32,18 +36,15 @@ class Heartbeat extends LXPattern {
     images[2] = loadImage("images/heart.png");
     images[3] = loadImage("images/triangle.png");
     
+    addParameter(minSize);
+    addParameter(pulseDelta);
+    
     xZoomTargets = new float[] {-45, 0, -85, 85};
     yZoomTargets = new float[] {75, -150, 250, 60};
     targetZooms = new float[] {0.8, 0.2, 0.5, 0.5};
     maxZooms = new float[] {10, 8, 10, 10};
-    backgroundColors = new color[] {
-      color(0, 0, 0), 
-      color(336, 81, 53), 
-      color(345, 11, 14), 
-      color(0, 0, 24)
-    };
-
-    backgroundColor = color(0, 0, 0);
+    
+    backgroundColor = color(255, 255, 255);
     
     currentSmiley = 0;
     currentZoom = 0.1;
@@ -97,7 +98,6 @@ class Heartbeat extends LXPattern {
   void update() {
     currentZoom *= zoomSpeed;
     if (currentZoom > maxZooms[currentSmiley]) {
-      backgroundColor = backgroundColors[currentSmiley];
 
       currentSmiley = nextSmiley;
       currentZoom = nextZoom;
