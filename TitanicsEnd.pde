@@ -44,6 +44,7 @@ void setup() {
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
+    new Plasma(lx),
     new Fire(lx),
     new InfiniteSmileys(lx),
     new TextScroller(lx),
@@ -51,7 +52,6 @@ void setup() {
     new Tunnel(lx),
     new BubbleBeats(lx),
     new FuzzyBeats(lx),
-    new Plasma(lx),
     new Warp(lx),
     new Strobe(lx),
     new Pulse(lx),

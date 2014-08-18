@@ -1,5 +1,3 @@
-
-
 // This is meant to be used as a singleton and is instantiated in TitanicsEnd.pde
 class Amulet {
   BooleanParameter heartbeatMode;
