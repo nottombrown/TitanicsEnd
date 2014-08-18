@@ -934,6 +934,7 @@ class InfiniteSmileys extends LXPattern {
 
     g.popMatrix();
 
+    // Is this code just for a single frame?
     if (currentZoom > targetZooms[currentSmiley]) {
       g.pushMatrix();
       g.translate(model.cx, model.cy);

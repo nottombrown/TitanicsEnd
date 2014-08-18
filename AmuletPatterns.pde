@@ -30,12 +30,8 @@ class Heartbeat extends LXPattern {
   Heartbeat(LX lx) {
     super(lx);
     
-    images = new PImage[4];
-    images[0] = loadImage("images/heart.png");
-    images[1] = loadImage("images/triangle.png");
-    images[2] = loadImage("images/heart.png");
-    images[3] = loadImage("images/triangle.png");
-    
+    heart = new PImage("images/heart.png");
+
     addParameter(minSize);
     addParameter(pulseDelta);
     
@@ -59,27 +55,18 @@ class Heartbeat extends LXPattern {
     
     g.imageMode(CENTER);
     
+    float zoom = nextZoom * beatZoom * minSize.getValuef();
     g.beginDraw();
     g.background(backgroundColor);
     g.noStroke();
     g.pushMatrix();
     g.translate(model.cx, model.cy);
-    g.scale(currentZoom * beatZoom, -currentZoom * beatZoom);
+    g.scale(zoom, -zoom);
     g.translate(xZoomTargets[currentSmiley], yZoomTargets[currentSmiley]);
 
     g.image(images[currentSmiley], 0, 0);
 
     g.popMatrix();
-
-    if (currentZoom > targetZooms[currentSmiley]) {
-      g.pushMatrix();
-      g.translate(model.cx, model.cy);
-      g.scale(nextZoom * beatZoom, -nextZoom * beatZoom);
-      g.translate(xZoomTargets[nextSmiley], yZoomTargets[nextSmiley]);
-      g.image(images[nextSmiley], 0, 0);
-      g.popMatrix();
-    }
-
     g.endDraw();
     
     return g.get();
