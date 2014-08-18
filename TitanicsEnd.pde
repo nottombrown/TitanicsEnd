@@ -28,17 +28,24 @@ P2LX lx;
 FrequencyGate beat;
 GraphicEQ eq;
 
+// Global 
+Amulet amulet = new Amulet();
+
 void setup() {
   // Processing config
   size(800, 600, OPENGL);
   
   // LX engine instance
-  lx = new P2LX(this, model = new Model());
+  lx = new P2LX(this, model = new Model());  
+  
+  // Set up the amulet
+  amulet.setup();
   
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
     new Logo(lx),
+    new Plasma(lx),
     new Fire(lx),
     new InfiniteSmileys(lx),
     new TextScroller(lx),
@@ -46,7 +53,6 @@ void setup() {
     new Tunnel(lx),
     new BubbleBeats(lx),
     new FuzzyBeats(lx),
-    new Plasma(lx),
     new Warp(lx),
     new Strobe(lx),
     new Pulse(lx),
@@ -70,6 +76,9 @@ void setup() {
   // Effects
   final BeatMask beatMask;
   lx.addEffect(beatMask = new BeatMask(lx));
+  
+  final Heartbeat heartbeat;
+  lx.addEffect(heartbeat = new Heartbeat(lx));
   
   // Audio detection
   eq = new GraphicEQ(lx.audioInput(), 4);
@@ -145,6 +154,7 @@ void setup() {
   lx.ui.addLayer(new UIBeatDetect(lx.ui, beat, 4, 326));
   lx.ui.addLayer(new UIOutputControl(lx.ui, output, 4, 518));
   lx.ui.addLayer(new UIEffect(lx.ui, beatMask, width - 144, 4));
+  lx.ui.addLayer(new UIEffect(lx.ui, heartbeat, width - 144, 4));
   lx.engine.setThreaded(false);
 }
 

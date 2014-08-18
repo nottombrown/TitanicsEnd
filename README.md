@@ -5,6 +5,17 @@ TitanicsEnd
 
 To run, download [Processing2](https://processing.org/download/?processing), then open `TitanicsEnd.pde` and hit `Run`.
 
+To play it on the car, run your fadecandy server
+# you need the fadecandy repos for this. easiest solution is to symlink fcserver-osx from there to this TE repos -- ln -nfs ../fade.../fcserver-osx  ./   
+# assuming fadecandy repos and this TE repos live in same directory
+
+```  
+./fcserver-osx fcserver-config.json
+```
+
+
+And then uncheck the `disabled` button in the bottom left of the Processing app.
+
 To contribute, look inside `Patterns.pde`.
 
 To add a normal pattern (for most):
@@ -15,7 +26,8 @@ To add a normal pattern (for most):
 Huge thanks to Mark Slee for putting together the framework.
 
 # Goals before the burn
-- [ ] Northern lights pattern
-- [ ] Tap-based BPM recording for beatmatching
-- [ ] MIDI connection
+- [x] Northern lights pattern
+- [x] Beatmatching
+- [x] MIDI connection
 - [ ] Remote control thunderclap from this [RING OF POWER](http://www.amazon.com/gp/product/B00CQ16ZR8/ref=oh_aui_detailpage_o00_s00?ie=UTF8&psc=1) that I just bought
+- [ ] Option for global "heart-throb" mode where saturation is controlled by the beat

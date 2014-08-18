@@ -934,6 +934,8 @@ class InfiniteSmileys extends LXPattern {
 
     g.popMatrix();
 
+    // Is this code just for a single frame?
+    // csmoak: this code redraws the smaller smiley each frame. is shows the smaller smiley when the larger one has zoomed in enough. you will have at most 2 on the screen at once.
     if (currentZoom > targetZooms[currentSmiley]) {
       g.pushMatrix();
       g.translate(model.cx, model.cy);
