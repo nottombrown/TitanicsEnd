@@ -76,6 +76,9 @@ void setup() {
   final BeatMask beatMask;
   lx.addEffect(beatMask = new BeatMask(lx));
   
+  final Heartbeat heartbeat;
+  lx.addEffect(heartbeat = new Heartbeat(lx));
+  
   // Audio detection
   eq = new GraphicEQ(lx.audioInput(), 4);
   eq.attack.setValue(10);
@@ -150,6 +153,7 @@ void setup() {
   lx.ui.addLayer(new UIBeatDetect(lx.ui, beat, 4, 326));
   lx.ui.addLayer(new UIOutputControl(lx.ui, output, 4, 518));
   lx.ui.addLayer(new UIEffect(lx.ui, beatMask, width - 144, 4));
+  lx.ui.addLayer(new UIEffect(lx.ui, heartbeat, width - 144, 4));
   lx.engine.setThreaded(false);
 }
 
