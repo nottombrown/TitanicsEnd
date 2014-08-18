@@ -24,11 +24,6 @@ class Heartbeat extends LXEffect {
   float[] targetZooms;
   float[] maxZooms;
    
-  int currentSmiley;
-  float currentZoom;
-  int nextSmiley;
-  float nextZoom;
-  
   float xTranslate = 0;
   float yTranslate = 0;
 
