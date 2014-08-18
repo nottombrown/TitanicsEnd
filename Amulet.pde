@@ -1,6 +1,7 @@
 // This is meant to be used as a singleton and is instantiated in TitanicsEnd.pde
 class Amulet {
   BooleanParameter heartbeatMode;
+  LXListenableParameter symbolIndex;
   Amulet() { } 
   
   void setup() {
@@ -8,17 +9,16 @@ class Amulet {
   } 
 }
 
-// I don't like this as a global. 
-// Is there a way to listen for keypresses from within the Amulet class?
 void keyPressed() {
+  println(keyCode);
+  if (keyCode == 34) {
+    println("hit right");
+  } 
+  if (keyCode == 33) {
+    println("hit left");
+  } 
   if(keyCode == 66) {
-    amulet.heartbeatMode.setValue(true);
-  }
-}
-
-void keyReleased() {
-  if(keyCode == 66) {
-    amulet.heartbeatMode.setValue(false);
+    amulet.heartbeatMode.toggle();
   }
 }
 
