@@ -3,7 +3,7 @@ class Heartbeat extends LXPattern {
     
   PGraphics g;
   
-  PImage[] images;
+  PImage heart;
   float[] xZoomTargets;
   float[] yZoomTargets;
   float[] targetZooms;
@@ -22,7 +22,7 @@ class Heartbeat extends LXPattern {
   
   color backgroundColor;
   
-  BasicParameter minSize = new BasicParameter("SIZE", 1, 0, 10);
+  BasicParameter minSize = new BasicParameter("SIZE", 0.05, 0, 0.2);
   BasicParameter pulseDelta = new BasicParameter("PULSE", 1, 0, 10);
   BasicParameter baseSaturation = new BasicParameter("SAT", 100, 0, 100);
   BooleanParameter useBeat = new BooleanParameter("BEAT", true);
@@ -30,7 +30,8 @@ class Heartbeat extends LXPattern {
   Heartbeat(LX lx) {
     super(lx);
     
-    heart = new PImage("images/heart.png");
+    heart = new PImage();
+    heart = loadImage("images/heart.png");
 
     addParameter(minSize);
     addParameter(pulseDelta);
@@ -51,11 +52,11 @@ class Heartbeat extends LXPattern {
   }
 
   PImage drawImage() {
-    float beatZoom = constrain(eq.getAveragef(1, 4) + 0.8, 1., 1.5);
+    float beatZoom = constrain(eq.getAveragef(1, 10)*pulseDelta.getValuef() + 1, 1., 1.5);
     
     g.imageMode(CENTER);
     
-    float zoom = nextZoom * beatZoom * minSize.getValuef();
+    float zoom = beatZoom * minSize.getValuef();
     g.beginDraw();
     g.background(backgroundColor);
     g.noStroke();
@@ -64,7 +65,7 @@ class Heartbeat extends LXPattern {
     g.scale(zoom, -zoom);
     g.translate(xZoomTargets[currentSmiley], yZoomTargets[currentSmiley]);
 
-    g.image(images[currentSmiley], 0, 0);
+    g.image(heart, 0, 0);
 
     g.popMatrix();
     g.endDraw();
@@ -74,33 +75,15 @@ class Heartbeat extends LXPattern {
 
   float zoomSpeed = 1.02;
 
-  int pickNextSmiley() {
-    int pick;
-    do {
-      pick = int(random(images.length));
-    } while(pick == currentSmiley);
-    return pick;
-  }
 
   void update() {
     currentZoom *= zoomSpeed;
     if (currentZoom > maxZooms[currentSmiley]) {
-
-      currentSmiley = nextSmiley;
-      currentZoom = nextZoom;
-      
-      nextSmiley = pickNextSmiley();
       nextZoom = 0.01;
     }
     xTranslate = xZoomTargets[currentSmiley]; 
     yTranslate = yZoomTargets[currentSmiley]; 
 
-    if (currentZoom > targetZooms[currentSmiley]) {
-      nextZoom *= zoomSpeed;
-    }
-    else {
-      nextZoom = 0.01;
-    }
   }
 
   public void run(double deltaMs) {
