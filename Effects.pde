@@ -92,8 +92,17 @@ class Heartbeat extends LXEffect {
           iy = int(p.y / model.yRange * img.height); 
         }
         int imageColor = img.get(ix, iy);
-        int unfilteredColor = colors[p.index];
-        colors[p.index] = LXColor.lightest(imageColor, unfilteredColor);
+        int origColor = colors[p.index];
+        float[] origHSB = LXColor.RGBtoHSB(origColor, null);
+        
+        // Invert the hues when the heart is on
+        if (LXColor.b(imageColor) > 50) {
+          colors[p.index] = LXColor.hsb(
+            -LXColor.h(origColor),
+            LXColor.s(origColor),
+            LXColor.b(origColor)
+          );
+        }
       }
     }
   }
