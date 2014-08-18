@@ -6,10 +6,13 @@ TitanicsEnd
 To run, download [Processing2](https://processing.org/download/?processing), then open `TitanicsEnd.pde` and hit `Run`.
 
 To play it on the car, run your fadecandy server
+# you need the fadecandy repos for this. easiest solution is to symlink fcserver-osx from there to this TE repos -- ln -nfs ../fade.../fcserver-osx  ./   
+# assuming fadecandy repos and this TE repos live in same directory
 
-```
+```  
 ./fcserver-osx fcserver-config.json
 ```
+
 
 And then uncheck the `disabled` button in the bottom left of the Processing app.
 
