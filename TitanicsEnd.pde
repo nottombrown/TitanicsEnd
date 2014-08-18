@@ -40,6 +40,7 @@ void setup() {
   lx.setPatterns(patterns = new LXPattern[] {
     new Fire(lx),
     new InfiniteSmileys(lx),
+    new TextScroller(lx),
     new Tribal(lx),
     new Tunnel(lx),
     new BubbleBeats(lx),

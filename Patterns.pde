@@ -1162,3 +1162,87 @@ public class Fire extends LXPattern {
   }
 }
 
+public class TextScroller extends LXPattern {
+
+  PFont font;
+  PGraphics g;
+  float scrollX = 0;
+  float scrollXBeat = 0;
+  String[] messages = new String[] {
+    "TITANIC'S END -- FOLLOW US TO THE BOTTOM OF THE DUSTY SEA",
+    "THIS IS JUST THE TIP",
+    "BURN BABY BURN",
+    "S. O. S. ... S. O. S.",
+    "LET'S PLAY CHICKEN"
+  };
+  int message = 0;
+  DiscreteParameter nextMessage = new DiscreteParameter("MSG", 5);  
+
+  BasicParameter speed = new BasicParameter("SPEED", 3, 0.1, 10);
+  BasicParameter baseHue = new BasicParameter("HUE", 0, 0, 360);
+  BasicParameter baseSaturation = new BasicParameter("SAT", 100, 0, 100);
+  BooleanParameter useBeat = new BooleanParameter("BEAT", true);
+  
+  SinLFO hueChange = new SinLFO(0, 50, 1*SECONDS);
+  
+  float scale = 1;
+  
+  TextScroller(LX lx) {
+    super(lx);
+    addParameter(speed);
+    addParameter(nextMessage);
+    addParameter(baseHue);
+    addParameter(baseSaturation);
+    addParameter(useBeat);
+    addModulator(hueChange).start();
+    
+    font = loadFont("AvenirNext-Bold-48.vlw");
+    g = createGraphics(int(model.xRange), int(model.yRange));
+    g.textFont(font, 100);
+  }
+  
+  PImage drawImage() {
+    g.beginDraw();
+    g.background(0);
+    g.pushMatrix();
+    g.scale(1, -1);
+    g.translate(model.xRange - (scrollX + (scale > 1 ? scrollXBeat * (scale - 1) : 0)), 0);
+    g.fill(color(baseHue.getValuef() + hueChange.getValuef(), baseSaturation.getValuef(), 100));
+    g.textFont(font, 100 * scale);
+    g.text(messages[message], -0 * (scale - 1), -20 + 50 * (scale - 1));
+    g.popMatrix();
+    g.endDraw();
+    return g.get();
+  }
+  
+  public void run(double deltaMs) {
+    scale = useBeat.isOn() ? 1 + beat.getValuef() * 0.5 : 1;
+    
+    float oldScrollX = scrollX;
+    g.textFont(font, 100);
+    scrollX = (scrollX + (float) deltaMs / 10. * speed.getValuef()) % int(g.textWidth(messages[message]) + model.xRange);
+    g.textFont(font, 100 * scale);
+    scrollXBeat = (g.textWidth(messages[message]) + model.xRange) * (scrollX / int(g.textWidth(messages[message]) + model.xRange));
+    if (scrollX < oldScrollX) {
+      message = nextMessage.getValuei();
+      scrollX = 0;
+      scrollXBeat = 0;
+    }
+    
+    PImage img = drawImage();
+    
+    for (LXPoint p : model.points) {
+      int ix, iy;
+      if (p.z > 0) {
+        ix = int((model.xRange - p.x - 5*FEET) / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      else {
+        ix = int(p.x / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      colors[p.index] = img.get(ix, iy);
+    }
+  }
+}
+
