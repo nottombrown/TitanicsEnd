@@ -1,4 +1,25 @@
 
+
+// This is meant to be used as a singleton and is instantiated in TitanicsEnd.pde
+class Amulet {
+  boolean heartbeatMode;
+  Amulet() {
+    heartbeatMode = false;
+  } 
+}
+
+void keyPressed() {
+  if(keyCode == 66) {
+    amulet.heartbeatMode = true;
+  }
+}
+
+void keyReleased() {
+  if(keyCode == 66) {
+    amulet.heartbeatMode = false;
+  }
+}
+
 class Heartbeat extends LXPattern {
     
   PGraphics g;
@@ -43,7 +64,6 @@ class Heartbeat extends LXPattern {
     
     backgroundColor = color(255, 255, 255);
     
-    currentSmiley = 0;
     currentZoom = 0.1;
     nextSmiley = 0;
     nextZoom = 0;
@@ -63,7 +83,6 @@ class Heartbeat extends LXPattern {
     g.pushMatrix();
     g.translate(model.cx, model.cy);
     g.scale(zoom, -zoom);
-    g.translate(xZoomTargets[currentSmiley], yZoomTargets[currentSmiley]);
 
     g.image(heart, 0, 0);
 
@@ -74,7 +93,6 @@ class Heartbeat extends LXPattern {
   }
 
   float zoomSpeed = 1.02;
-
 
   void update() {
     currentZoom *= zoomSpeed;

@@ -28,6 +28,9 @@ P2LX lx;
 FrequencyGate beat;
 GraphicEQ eq;
 
+// Global Amulet instance
+Amulet amulet = new Amulet();
+
 void setup() {
   // Processing config
   size(800, 600, OPENGL);
