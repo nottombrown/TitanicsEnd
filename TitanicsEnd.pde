@@ -6,6 +6,7 @@ import heronarts.p2lx.*;
 import heronarts.p2lx.ui.*;
 import heronarts.p2lx.ui.control.*;
 import ddf.minim.*;
+import oscP5.*;
 
 // Useful constants
 final static int SECONDS = 1000;
@@ -22,11 +23,26 @@ final static int FCSERVER_PORT = 7890;
 final static float CAR_BODY_HEIGHT = 9.5*FEET;
 final static float CAR_BODY_LENGTH = 16*FEET;
 
+LXPattern[] patterns;
+
 // Global engine objects
 Model model;
 P2LX lx;
 FrequencyGate beat;
 GraphicEQ eq;
+OscP5 oscP5;
+NetAddressList netAddressList = new NetAddressList();
+
+final int listeningPort = 10001;
+final int broadcastPort = 9001;
+
+final String connectPattern = "/server/connect";
+final String disconnectPattern = "/server/disconnect";
+
+final String changePatternPattern = "/server/changepattern";
+final String changeParamPattern = "/server/changeparam";
+
+final String statePattern = "/broadcast/state";
 
 // Global 
 Amulet amulet = new Amulet();
@@ -42,7 +58,6 @@ void setup() {
   amulet.setup();
   
   // Patterns
-  final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
     new Logo(lx),
     new Plasma(lx),
@@ -156,7 +171,86 @@ void setup() {
   lx.ui.addLayer(new UIEffect(lx.ui, beatMask, width - 144, 4));
   lx.ui.addLayer(new UIEffect(lx.ui, heartbeat, width - 144, 4));
   lx.engine.setThreaded(false);
+    
+  oscP5 = new OscP5(this, listeningPort);
 }
+
+void oscEvent(OscMessage theOscMessage) { 
+  /* print the address pattern and the typetag of the received OscMessage */ 
+  print(" addrpattern: "+theOscMessage.addrPattern()); 
+  println(" typetag: "+theOscMessage.typetag()); 
+  
+  /* check if the address pattern fits any of our patterns */
+  if (theOscMessage.addrPattern().equals(connectPattern)) {
+    String theIPaddress = theOscMessage.netAddress().address();
+    connect(theIPaddress);
+    //Send message to netAddress with current pattern / param states
+    oscP5.send(currentStateMessage(), new NetAddress(theIPaddress, broadcastPort));
+  }
+  else if (theOscMessage.addrPattern().equals(disconnectPattern)) {
+    disconnect(theOscMessage.netAddress().address());
+  }
+  /**
+   * if pattern matching was not successful, then broadcast the incoming
+   * message to all addresses in the netAddresList. 
+   */
+  else {
+    //Change pattern or param
+    if (theOscMessage.addrPattern().equals(changePatternPattern)){
+      int patternIndex = ((Number)theOscMessage.arguments()[0]).intValue();
+      lx.goPattern(patterns[patternIndex]);
+    }
+    else if (theOscMessage.addrPattern().equals(changeParamPattern)) {
+      String paramName = (String)theOscMessage.arguments()[0];
+      float newValue = ((Number)theOscMessage.arguments()[1]).floatValue();
+      lx.getPattern().getParameter(paramName).setValue((double)newValue);
+    }
+    //Broadcast message with current pattern / param states
+    oscP5.send(currentStateMessage(), netAddressList);
+  }
+}
+
+OscMessage currentStateMessage() {
+  OscMessage message = new OscMessage(statePattern);
+  LXPattern activePattern = lx.getPattern();
+  message.add("active pattern");
+  message.add(activePattern.getName());
+  for (LXParameter param : activePattern.getParameters()) {
+    if (param instanceof BasicParameter) {
+      BasicParameter basicParam = (BasicParameter)param;
+      message.add("begin param");
+      message.add(basicParam.getLabel());
+      message.add(basicParam.getValuef());
+      message.add((float)basicParam.range.v0);
+      message.add((float)basicParam.range.v1);
+    }
+  }
+  message.add("all patterns");
+  for (LXPattern pattern : patterns) {
+    message.add(pattern.getName());
+  }
+  return message;
+}
+
+void connect(String theIPaddress) {
+  if (!netAddressList.contains(theIPaddress, broadcastPort)) {
+    netAddressList.add(new NetAddress(theIPaddress, broadcastPort));
+    println("### adding "+theIPaddress+" to the list.");
+  } else {
+    println("### "+theIPaddress+" is already connected.");
+  }
+  println("### currently there are "+netAddressList.list().size()+" remote locations connected.");
+}
+
+void disconnect(String theIPaddress) {
+  if (netAddressList.contains(theIPaddress, broadcastPort)) {
+    netAddressList.remove(theIPaddress, broadcastPort);
+    println("### removing "+theIPaddress+" from the list.");
+  } else {
+    println("### "+theIPaddress+" is not connected.");
+  }
+    println("### currently there are "+netAddressList.list().size());
+ }
 
 void draw() {
   // Wipe background, engine takes care of the rest
