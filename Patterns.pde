@@ -1331,7 +1331,7 @@ public class Logo extends LXPattern {
 
 class HyperCube extends LXPattern {
   
-  final BasicParameter speed = new BasicParameter("SPEED", 1*SECONDS, 0.5*SECONDS, 5*SECONDS);
+  final BasicParameter speed = new BasicParameter("SPEED", 3*SECONDS, 0.5*SECONDS, 5*SECONDS);
   final BasicParameter hueBase = new BasicParameter("BASE", 200, 0, 360);
   
   final BasicParameter xSpeed = new BasicParameter("XSPD", 5*SECONDS, 0*SECONDS, 10*SECONDS);
