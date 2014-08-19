@@ -138,7 +138,7 @@ void setup() {
         }
         
         //Broadcast message with current pattern / param states
-        oscP5.send(currentStateMessage(), netAddressList);
+        oscP5.send(currentStateMessage(-1), netAddressList);
       }
     };
     
@@ -189,12 +189,14 @@ void oscEvent(OscMessage theOscMessage) {
   print(" addrpattern: "+theOscMessage.addrPattern()); 
   println(" typetag: "+theOscMessage.typetag()); 
   
+  int newPatternIndex = -1;
+  
   /* check if the address pattern fits any of our patterns */
   if (theOscMessage.addrPattern().equals(connectPattern)) {
     String theIPaddress = theOscMessage.netAddress().address();
     connect(theIPaddress);
     //Send message to netAddress with current pattern / param states
-    oscP5.send(currentStateMessage(), new NetAddress(theIPaddress, broadcastPort));
+    oscP5.send(currentStateMessage(newPatternIndex), new NetAddress(theIPaddress, broadcastPort));
   }
   else if (theOscMessage.addrPattern().equals(disconnectPattern)) {
     disconnect(theOscMessage.netAddress().address());
@@ -208,6 +210,7 @@ void oscEvent(OscMessage theOscMessage) {
     if (theOscMessage.addrPattern().equals(changePatternPattern)){
       int patternIndex = ((Number)theOscMessage.arguments()[0]).intValue();
       lx.goPattern(patterns[patternIndex]);
+      newPatternIndex = patternIndex;
     }
     else if (theOscMessage.addrPattern().equals(changeParamPattern)) {
       String paramName = (String)theOscMessage.arguments()[0];
@@ -215,14 +218,20 @@ void oscEvent(OscMessage theOscMessage) {
       lx.getPattern().getParameter(paramName).setValue((double)newValue);
     }
     //Broadcast message with current pattern / param states
-    oscP5.send(currentStateMessage(), netAddressList);
+    oscP5.send(currentStateMessage(newPatternIndex), netAddressList);
   }
 }
 
 // Create OSC message from current state
-OscMessage currentStateMessage() {
+OscMessage currentStateMessage(int newPatternIndex) {
   OscMessage message = new OscMessage(statePattern);
-  LXPattern activePattern = lx.getPattern();
+  LXPattern activePattern;
+  if (newPatternIndex == -1) {
+    activePattern = lx.getPattern();
+  }
+  else {
+    activePattern = patterns[newPatternIndex];
+  }
   message.add("active pattern");
   message.add(activePattern.getName());
   for (LXParameter param : activePattern.getParameters()) {
