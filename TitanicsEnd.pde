@@ -108,6 +108,9 @@ void setup() {
   lx.addModulator(eq).start();
   lx.addModulator(beat).start();
   
+  // OSC Control
+  oscP5 = new OscP5(this, listeningPort);
+  
   // Midi Control
   LXMidiInput qx25input = LXMidiSystem.matchInput(lx, "QX25");
   if (qx25input != null) {
@@ -131,6 +134,9 @@ void setup() {
           // assumes basic parameter
           ((BasicParameter) lx.getPattern().getParameters().get(param)).setNormalized(cc.getValue() / 127.);
         }
+        
+        //Broadcast message with current pattern / param states
+        oscP5.send(currentStateMessage(), netAddressList);
       }
     };
     
@@ -171,10 +177,9 @@ void setup() {
   lx.ui.addLayer(new UIEffect(lx.ui, beatMask, width - 144, 4));
   lx.ui.addLayer(new UIEffect(lx.ui, heartbeat, width - 144, 4));
   lx.engine.setThreaded(false);
-    
-  oscP5 = new OscP5(this, listeningPort);
 }
 
+// Respond to OSC Events
 void oscEvent(OscMessage theOscMessage) { 
   /* print the address pattern and the typetag of the received OscMessage */ 
   print(" addrpattern: "+theOscMessage.addrPattern()); 
@@ -210,6 +215,7 @@ void oscEvent(OscMessage theOscMessage) {
   }
 }
 
+// Create OSC message from current state
 OscMessage currentStateMessage() {
   OscMessage message = new OscMessage(statePattern);
   LXPattern activePattern = lx.getPattern();
@@ -232,6 +238,7 @@ OscMessage currentStateMessage() {
   return message;
 }
 
+// Subscribe OSC device to broadcasts
 void connect(String theIPaddress) {
   if (!netAddressList.contains(theIPaddress, broadcastPort)) {
     netAddressList.add(new NetAddress(theIPaddress, broadcastPort));
@@ -242,6 +249,7 @@ void connect(String theIPaddress) {
   println("### currently there are "+netAddressList.list().size()+" remote locations connected.");
 }
 
+// Unsubscribe OSC device from broadcasts
 void disconnect(String theIPaddress) {
   if (netAddressList.contains(theIPaddress, broadcastPort)) {
     netAddressList.remove(theIPaddress, broadcastPort);
@@ -250,7 +258,7 @@ void disconnect(String theIPaddress) {
     println("### "+theIPaddress+" is not connected.");
   }
     println("### currently there are "+netAddressList.list().size());
- }
+}
 
 void draw() {
   // Wipe background, engine takes care of the rest
