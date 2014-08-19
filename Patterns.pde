@@ -1329,3 +1329,313 @@ public class Logo extends LXPattern {
   }
 }
 
+class HyperCube extends LXPattern {
+  
+  final BasicParameter speed = new BasicParameter("SPEED", 3*SECONDS, 0.5*SECONDS, 5*SECONDS);
+  final BasicParameter hueBase = new BasicParameter("BASE", 200, 0, 360);
+  
+  final BasicParameter xSpeed = new BasicParameter("XSPD", 5*SECONDS, 0*SECONDS, 10*SECONDS);
+  final BasicParameter ySpeed = new BasicParameter("YSPD", 6*SECONDS, 0*SECONDS, 10*SECONDS);
+  
+  final SawLFO xRot = new SawLFO(0, 2*PI, xSpeed);
+  final SawLFO yRot = new SawLFO(0, 2*PI, ySpeed);
+
+  final SinLFO size = new SinLFO(1, 2, speed);
+
+  final int MODE_RAND = 0;
+  final int MODE_FRONT = 1;
+  final int MODE_HOLD = 2;
+  final int MODE_COUNT = 3;
+
+  final DiscreteParameter mode = new DiscreteParameter("MODE", MODE_RAND, MODE_COUNT);
+  
+  final int SOURCE_TEMPO = 0;
+  final int SOURCE_BEAT = 1;
+  final int SOURCE_COUNT = 2;
+  
+  final DiscreteParameter beatSource = new DiscreteParameter("BTSRC", SOURCE_TEMPO, SOURCE_COUNT);
+
+  final int COLOR_ROT = 0;
+  final int COLOR_BASE = 1;
+  final int COLOR_COUNT = 2;
+  
+  final DiscreteParameter colorMode = new DiscreteParameter("CLRMODE", COLOR_ROT, COLOR_COUNT);
+  
+  PGraphics g;
+
+  HyperCube(LX lx) {
+    super(lx);
+    addParameter(speed);
+    addParameter(hueBase);
+    
+    addParameter(xSpeed);
+    addParameter(ySpeed);
+    addParameter(mode);
+    addParameter(beatSource);
+    addParameter(colorMode);
+
+    addModulator(xRot).start();
+    addModulator(yRot).start();
+    addModulator(size).start();
+
+    g = createGraphics(int(model.xRange), int(model.yRange), P3D);
+  }
+
+  public final int OFFS_LEFT = 0;
+  public final int OFFS_RIGHT = 1;
+  public final int OFFS_FRONT = 2;
+  public final int OFFS_BACK = 3;
+  public final int OFFS_TOP = 4;
+  public final int OFFS_BOT = 5;
+  public final int OFFS_COUNT = 6;
+
+  int whichOffs = OFFS_LEFT;
+  float hue = 0;
+  
+  public void run(double deltaMs) {
+  
+    boolean isBeat = beatSource.getValuei() == SOURCE_TEMPO ? lx.tempo.beat() : beat.peak();
+  
+    if (lx.tempo.beat()) {
+      if (colorMode.getValuei() == COLOR_ROT) {
+        hue = hue + 30;
+      }
+      else {
+        hue = random(90) - 45;
+      }
+    }
+
+    float ramp = beatSource.getValuei() == SOURCE_TEMPO ? lx.tempo.rampf() : (1. - beat.getValuef());
+    float offs = map(pow(ramp, 0.5), 0, 1, -100, 0);
+    
+    switch (mode.getValuei()) {
+      case MODE_RAND:
+        if (isBeat) {
+          whichOffs = int(random(OFFS_COUNT));
+        }
+        break;
+        
+      case MODE_FRONT:
+        if (isBeat) {
+          whichOffs = OFFS_FRONT;
+        }
+        break;
+
+      case MODE_HOLD:
+        offs = 0;
+        break;
+    }
+      
+    float xOffs = 0, yOffs = 0, zOffs = 0;
+    switch (whichOffs) {
+      case OFFS_LEFT:
+        xOffs = offs;
+        break;
+      case OFFS_RIGHT:
+        xOffs = -offs;
+        break;
+      case OFFS_FRONT:
+        zOffs = -offs;
+        break;
+      case OFFS_BACK:
+        zOffs = offs;
+        break;
+      case OFFS_TOP:
+        yOffs = -offs;
+        break;
+      case OFFS_BOT:
+        yOffs = offs;
+        break;
+    }
+    
+    g.beginDraw();
+    g.background(color(0, 0, 0));
+    g.noFill();
+    
+    g.pushMatrix();
+    g.translate(model.cx, model.cy * 0.8, 0);
+    g.translate(xOffs, yOffs, zOffs);
+    g.rotateY(yRot.getValuef());
+    g.rotateX(xRot.getValuef());
+    g.noLights();
+    g.stroke(color((hueBase.getValuef() + hue) % 360, 100, 100));
+    g.strokeWeight(10);
+    g.box(model.cy * 0.85 * size.getValuef());
+    g.stroke(color((hueBase.getValuef() + hue) % 360, 50, 100));
+    g.strokeWeight(10);
+    g.box(model.cy * 0.85 * map(size.getValuef(), 1, 2, 2, 1));
+
+    g.popMatrix();
+    g.endDraw();
+    
+    PImage img = g.get();
+    
+    for (LXPoint p : model.points) {
+      int ix, iy;
+      if (p.z > 0) {
+        ix = int((model.xRange - p.x - 5*FEET) / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      else {
+        ix = int(p.x / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      colors[p.index] = img.get(ix, iy);
+    }
+  }
+}
+
+public class Grow extends LXPattern {
+
+  PGraphics g;
+  int branchMax = 5;
+  float timeS = 0;
+  float progress = 0;
+  float baseAngle = 30;
+  float angleSpread = 15;
+  int seed = 0;
+  float minBranchLength = 10;
+  float minBranchLengthSpread = 5;
+  float maxBranchLength = 40;
+  float maxBranchLengthSpread = 20;
+  
+  float trunkHue = 37;
+  float trunkBrightness = 51;
+  float leafHue = 93;
+  float leafBrightness = 51;
+  
+  BasicParameter speed = new BasicParameter("SPEED", 5, 0, 20);
+  
+  Grow(LX lx) {
+    super(lx);
+    addParameter(speed);
+    
+    g = createGraphics(int(model.xRange), int(model.yRange));
+  }
+  
+  void drawBranch(int step, float left) {
+    float angle = baseAngle + map(random(1), 0, 1, -angleSpread, angleSpread);
+    float baseBranchLength = map(step, 0, branchMax, 
+      maxBranchLength + map(random(1), 0, 1, -maxBranchLengthSpread, maxBranchLengthSpread),
+      minBranchLength + map(random(1), 0, 1, -minBranchLengthSpread, minBranchLengthSpread)
+    );
+    float len = -baseBranchLength * constrain(left, 0, 1);
+    float branchWidth = map(step, 0, branchMax, 20, 5);
+    float hue = map(step, 0, branchMax, trunkHue, leafHue); 
+    float brightness = map(step, 0, branchMax, trunkBrightness, leafBrightness); 
+    
+    if (left > 0) {
+      g.strokeWeight(branchWidth);
+      g.noFill();
+      g.stroke(color(hue, 100, brightness));
+      g.line(0, 0, 0, len);
+    }
+    
+    if (step < branchMax) {
+      g.pushMatrix();
+      g.translate(0, len);
+      
+      g.pushMatrix();
+      g.rotate(radians(-angle));
+      drawBranch(step + 1, left - 1);
+      g.popMatrix();
+
+      g.pushMatrix();
+      g.rotate(radians(angle));
+      drawBranch(step + 1, left - 1);
+      g.popMatrix();
+      
+      g.popMatrix();
+    }
+  }
+  
+  PImage drawImage() {
+    float beatZoom = map(eq.getAveragef(1, 4), 0, 1, 0, 4);
+    
+    g.beginDraw();
+    g.background(color(200, map(beatZoom, 0, 4, 50, 100), 50));
+    g.pushMatrix();
+    g.translate(model.cx + slideX, 0);
+    g.scale(1, -1);
+    
+    g.stroke(color(90, map(beatZoom, 0, 4, 100, 0), 100));
+    g.strokeWeight(15);
+    g.noFill();
+    g.line(-model.xRange, 0, model.xRange, 0);
+
+    randomSeed(seed);
+    drawBranch(0, progress + beatZoom);
+
+    g.popMatrix();
+    g.endDraw();
+    return g.get();
+  }
+
+  final int STATE_GROWING = 0;
+  final int STATE_SLIDING = 1;
+  final int STATE_COUNT = 2;
+
+  int state = STATE_GROWING;
+  float slideX = 0;
+
+  public void run(double deltaMs) {
+    timeS += deltaMs / 1000.;
+
+    boolean reset = false;      
+    
+    if (state == STATE_GROWING) {
+      if (progress >= branchMax) {
+        state = STATE_SLIDING;
+      }
+      else {
+        progress += deltaMs / 1000. * 2.;
+      }
+    }
+    else {
+      slideX += deltaMs;
+      if (slideX >= model.xRange) {
+        reset = true;
+      }
+    }
+    
+    if (reset) {
+      progress = 0;
+      slideX = 0;
+      state = STATE_GROWING;
+      
+      randomSeed((long) (timeS * 1000));
+      seed = (int) random(MAX_INT);
+
+      branchMax = int(map(random(1), 0, 1, 4, 7));
+
+      baseAngle = map(random(1), 0, 1, 15, 45);
+      angleSpread = map(random(1), 0, 1, 5, 25);
+
+      minBranchLength = map(random(1), 0, 1, 10, 20);
+      minBranchLengthSpread = map(random(1), 0, 1, 0, minBranchLength * 0.3);
+      maxBranchLength = minBranchLength + map(random(1), 0, 1, 10, 30);
+      maxBranchLengthSpread = map(random(1), 0, 1, 0, maxBranchLength * 0.3);
+      
+      trunkHue = map(random(1), 0, 1, 26, 56);
+      trunkBrightness = map(random(1), 0, 1, 51, 100);
+      leafHue = map(random(1), 0, 1, 82, 145);
+      leafBrightness = map(random(1), 0, 1, 51, 100);
+    }
+    
+    PImage img = drawImage();
+    
+    for (LXPoint p : model.points) {
+      int ix, iy;
+      if (p.z > 0) {
+        ix = int((model.xRange - p.x - 5*FEET) / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      else {
+        ix = int(p.x / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      colors[p.index] = img.get(ix, iy);
+    }
+  }
+}
+
