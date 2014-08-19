@@ -44,6 +44,7 @@ void setup() {
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
+    new HyperCube(lx),
     new Logo(lx),
     new Plasma(lx),
     new Fire(lx),
@@ -156,6 +157,8 @@ void setup() {
   lx.ui.addLayer(new UIEffect(lx.ui, beatMask, width - 144, 4));
   lx.ui.addLayer(new UIEffect(lx.ui, heartbeat, width - 144, 4));
   lx.engine.setThreaded(false);
+  
+  lx.tempo.bpm.setValue(60);
 }
 
 void draw() {
