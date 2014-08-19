@@ -44,6 +44,7 @@ void setup() {
   // Patterns
   final LXPattern[] patterns;
   lx.setPatterns(patterns = new LXPattern[] {
+    new Grow(lx),
     new HyperCube(lx),
     new Logo(lx),
     new Plasma(lx),

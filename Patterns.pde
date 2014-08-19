@@ -1485,3 +1485,157 @@ class HyperCube extends LXPattern {
   }
 }
 
+public class Grow extends LXPattern {
+
+  PGraphics g;
+  int branchMax = 5;
+  float timeS = 0;
+  float progress = 0;
+  float baseAngle = 30;
+  float angleSpread = 15;
+  int seed = 0;
+  float minBranchLength = 10;
+  float minBranchLengthSpread = 5;
+  float maxBranchLength = 40;
+  float maxBranchLengthSpread = 20;
+  
+  float trunkHue = 37;
+  float trunkBrightness = 51;
+  float leafHue = 93;
+  float leafBrightness = 51;
+  
+  BasicParameter speed = new BasicParameter("SPEED", 5, 0, 20);
+  
+  Grow(LX lx) {
+    super(lx);
+    addParameter(speed);
+    
+    g = createGraphics(int(model.xRange), int(model.yRange));
+  }
+  
+  void drawBranch(int step, float left) {
+    float angle = baseAngle + map(random(1), 0, 1, -angleSpread, angleSpread);
+    float baseBranchLength = map(step, 0, branchMax, 
+      maxBranchLength + map(random(1), 0, 1, -maxBranchLengthSpread, maxBranchLengthSpread),
+      minBranchLength + map(random(1), 0, 1, -minBranchLengthSpread, minBranchLengthSpread)
+    );
+    float len = -baseBranchLength * constrain(left, 0, 1);
+    float branchWidth = map(step, 0, branchMax, 20, 5);
+    float hue = map(step, 0, branchMax, trunkHue, leafHue); 
+    float brightness = map(step, 0, branchMax, trunkBrightness, leafBrightness); 
+    
+    if (left > 0) {
+      g.strokeWeight(branchWidth);
+      g.noFill();
+      g.stroke(color(hue, 100, brightness));
+      g.line(0, 0, 0, len);
+    }
+    
+    if (step < branchMax) {
+      g.pushMatrix();
+      g.translate(0, len);
+      
+      g.pushMatrix();
+      g.rotate(radians(-angle));
+      drawBranch(step + 1, left - 1);
+      g.popMatrix();
+
+      g.pushMatrix();
+      g.rotate(radians(angle));
+      drawBranch(step + 1, left - 1);
+      g.popMatrix();
+      
+      g.popMatrix();
+    }
+  }
+  
+  PImage drawImage() {
+    float beatZoom = map(eq.getAveragef(1, 4), 0, 1, 0, 4);
+    
+    g.beginDraw();
+    g.background(color(200, map(beatZoom, 0, 4, 50, 100), 50));
+    g.pushMatrix();
+    g.translate(model.cx + slideX, 0);
+    g.scale(1, -1);
+    
+    g.stroke(color(90, map(beatZoom, 0, 4, 100, 0), 100));
+    g.strokeWeight(15);
+    g.noFill();
+    g.line(-model.xRange, 0, model.xRange, 0);
+
+    randomSeed(seed);
+    drawBranch(0, progress + beatZoom);
+
+    g.popMatrix();
+    g.endDraw();
+    return g.get();
+  }
+
+  final int STATE_GROWING = 0;
+  final int STATE_SLIDING = 1;
+  final int STATE_COUNT = 2;
+
+  int state = STATE_GROWING;
+  float slideX = 0;
+
+  public void run(double deltaMs) {
+    timeS += deltaMs / 1000.;
+
+    boolean reset = false;      
+    
+    if (state == STATE_GROWING) {
+      if (progress >= branchMax) {
+        state = STATE_SLIDING;
+      }
+      else {
+        progress += deltaMs / 1000. * 2.;
+      }
+    }
+    else {
+      slideX += deltaMs;
+      if (slideX >= model.xRange) {
+        reset = true;
+      }
+    }
+    
+    if (reset) {
+      progress = 0;
+      slideX = 0;
+      state = STATE_GROWING;
+      
+      randomSeed((long) (timeS * 1000));
+      seed = (int) random(MAX_INT);
+
+      branchMax = int(map(random(1), 0, 1, 4, 7));
+
+      baseAngle = map(random(1), 0, 1, 15, 45);
+      angleSpread = map(random(1), 0, 1, 5, 25);
+
+      minBranchLength = map(random(1), 0, 1, 10, 20);
+      minBranchLengthSpread = map(random(1), 0, 1, 0, minBranchLength * 0.3);
+      maxBranchLength = minBranchLength + map(random(1), 0, 1, 10, 30);
+      maxBranchLengthSpread = map(random(1), 0, 1, 0, maxBranchLength * 0.3);
+      
+      trunkHue = map(random(1), 0, 1, 26, 56);
+      trunkBrightness = map(random(1), 0, 1, 51, 100);
+      leafHue = map(random(1), 0, 1, 82, 145);
+      leafBrightness = map(random(1), 0, 1, 51, 100);
+    }
+    
+    PImage img = drawImage();
+    
+    for (LXPoint p : model.points) {
+      int ix, iy;
+      if (p.z > 0) {
+        ix = int((model.xRange - p.x - 5*FEET) / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      else {
+        ix = int(p.x / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      colors[p.index] = img.get(ix, iy);
+    }
+  }
+}
+
