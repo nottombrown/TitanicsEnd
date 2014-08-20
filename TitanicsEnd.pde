@@ -59,11 +59,11 @@ void setup() {
   
   // Patterns
   lx.setPatterns(patterns = new LXPattern[] {
+    new Plasma(lx),
     new Dance(lx),
     new Grow(lx),
     new HyperCube(lx),
     new Logo(lx),
-    new Plasma(lx),
     new Fire(lx),
     new InfiniteSmileys(lx),
     new TextScroller(lx),

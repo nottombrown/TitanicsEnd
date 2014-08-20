@@ -1,12 +1,17 @@
 // This is meant to be used as a singleton and is instantiated in TitanicsEnd.pde
 class Amulet {
-  BooleanParameter heartbeatMode;
+  float heartPower;
+  BasicParameter heartDecay;
   LXListenableParameter symbolIndex;
   Amulet() { } 
   
   void setup() {
-    heartbeatMode = new BooleanParameter("HEART", false);
+    heartPower = 0.0
+    heartDecay = new BasicParameter("DECAY", 0.02, 0, 0.1);
   } 
+  void loop(double deltaMS) {
+     heart.setValue(heart.getValuef()-heartDecay.getValuef());
+  }
 }
 
 void keyPressed() {
@@ -18,7 +23,7 @@ void keyPressed() {
     println("hit left");
   } 
   if(keyCode == 66) {
-    amulet.heartbeatMode.toggle();
+    amulet.heartPower = 1.0
   }
 }
 
