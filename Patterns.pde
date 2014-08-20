@@ -1463,7 +1463,7 @@ class HyperCube extends LXPattern {
     g.box(model.cy * 0.85 * size.getValuef());
     g.stroke(color((hueBase.getValuef() + hue) % 360, 50, 100));
     g.strokeWeight(10);
-    g.box(model.cy * 0.85 * map(size.getValuef(), 1, 2, 2, 1));
+    //g.box(model.cy * 0.85 * map(size.getValuef(), 1, 2, 2, 1));
 
     g.popMatrix();
     g.endDraw();
@@ -1617,11 +1617,157 @@ public class Grow extends LXPattern {
       maxBranchLengthSpread = map(random(1), 0, 1, 0, maxBranchLength * 0.3);
       
       trunkHue = map(random(1), 0, 1, 26, 56);
-      trunkBrightness = map(random(1), 0, 1, 51, 100);
+      trunkBrightness = 80;//map(random(1), 0, 1, 51, 100);
       leafHue = map(random(1), 0, 1, 82, 145);
-      leafBrightness = map(random(1), 0, 1, 51, 100);
+      leafBrightness = 100;//map(random(1), 0, 1, 51, 100);
     }
     
+    PImage img = drawImage();
+    
+    for (LXPoint p : model.points) {
+      int ix, iy;
+      if (p.z > 0) {
+        ix = int((model.xRange - p.x - 5*FEET) / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      else {
+        ix = int(p.x / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      colors[p.index] = img.get(ix, iy);
+    }
+  }
+}
+
+public class Dance extends LXPattern {
+
+  PGraphics g;
+  final int MOVE_COUNT = 6;
+  PImage[] moves = new PImage[MOVE_COUNT];
+  int move = 0;
+  int flip = 1;
+  
+  int[] table = new int[256];
+
+  final int SOURCE_TEMPO = 0;
+  final int SOURCE_BEAT = 1;
+  final int SOURCE_COUNT = 2;
+  
+  final DiscreteParameter beatSource = new DiscreteParameter("BTSRC", SOURCE_TEMPO, SOURCE_COUNT);
+
+  BasicParameter speed = new BasicParameter("SPEED", 1, 0, 2);
+  
+  Dance(LX lx) {
+    super(lx);
+    addParameter(speed);
+    addParameter(beatSource);
+    
+    // One period of the sinus function shifted to range [0-255] 
+    for (int i = 0; i < 256; i++) {
+      table[i] = (int)(128 + 127.0 * sin(i * TWO_PI / 256.0));
+    }
+
+    for (int i = 0; i < MOVE_COUNT; i++) {
+      moves[i] = loadImage("images/dance" + Integer.toString(i + 1) + "a.png");
+    }
+
+    g = createGraphics(int(model.xRange), int(model.yRange));
+  }
+  
+  color rgb2hsv(float r, float g, float b) {
+    float h, s, v;
+
+    float min, max, delta;
+    min = min( r, g, b );
+    max = max( r, g, b );
+    v = max;        // v
+    delta = max - min;
+    if( max != 0 )
+      s = delta / max;    // s
+    else {
+      // r = g = b = 0    // s = 0, v is undefined
+      s = 0;
+      h = -1;
+      return color(0, s * 100, v * 100);
+    }
+    if( r == max )
+      h = ( g - b ) / delta;    // between yellow & magenta
+    else if( g == max )
+      h = 2 + ( b - r ) / delta;  // between cyan & yellow
+    else
+      h = 4 + ( r - g ) / delta;  // between magenta & cyan
+    h *= 60;        // degrees
+    if( h < 0 )
+      h += 360;
+      
+    return color(h, s * 100, v * 100);
+  }
+  
+  float timeMs = 0;
+  
+  PImage drawImage() {
+    // grab some samples, hmm could have used lookup table...
+    int t = (int)(128 + 127.0 * sin(0.0013 * (float)timeMs));
+    int t2 = (int)(128 + 127.0 * sin(0.0023 * (float)timeMs));
+    int t3 = (int)(128 + 127.0 * sin(0.0007 * (float)timeMs));
+
+    g.loadPixels();
+    for (int y = 0; y < g.height; y++) {
+      for (int x = 0; x < g.width; x++) {
+        // Define a function for each color component that depends on the
+        // x,y coordinate and time. Use the lookup table for nice swirly movement.
+        // There is no deeper logic here, I just experimented with the functions
+        // untill I found something that looked pleasing.
+        int r = table[(x / 5 + t / 4 + table[(t2 / 3 + y / 8) & 0xff]) & 0xff];
+        int gr = table[(y / 3 + t + table[(t3 + x / 5) & 0xff]) & 0xff];
+        int b = table[(y / 4 + t2 + table[(t + gr / 4 + x / 3) & 0xff]) & 0xff];
+        g.pixels[x + y * g.width] = rgb2hsv(r, gr, b);
+      }
+    }
+    g.updatePixels();
+
+    float beatZoom = map(eq.getAveragef(1, 4), 0, 1, 1, 4);
+    
+    g.beginDraw();
+    g.pushMatrix();
+    g.translate(model.cx / 2, model.cy + 50);
+    g.scale(1, -1);
+    g.scale(0.25);
+    g.blendMode(SUBTRACT);
+    g.translate(moves[move].width / 2, 0);
+    g.scale(flip, 1);
+    g.translate(-moves[move].width / 2, 0);
+    g.image(moves[move], 0, 0);
+    g.popMatrix();
+    g.endDraw();
+
+    return g.get();
+  }
+
+  int pickMove() {
+    int m = move;
+    do {
+      m = int(random(MOVE_COUNT));
+    } while (m == move);
+    return m;
+  }
+
+  public void run(double deltaMs) {
+    timeMs += deltaMs * speed.getValuef();
+   
+    if (beatSource.getValuei() == SOURCE_TEMPO) {
+      if (lx.tempo.beat()) {
+        move = pickMove();
+        flip = random(1) > 0.5 ? 1 : -1;
+      }
+    }
+    else {
+      if (beat.peak()) {
+        move = pickMove();
+        flip = random(1) > 0.5 ? 1 : -1;
+      }
+    }
+
     PImage img = drawImage();
     
     for (LXPoint p : model.points) {

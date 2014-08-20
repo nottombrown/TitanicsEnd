@@ -112,7 +112,7 @@
 
         {
             "type": "fadecandy",
-            "serial": "???",
+            "serial": "UYSSAOWWPFYZCJMP",
             "led": false,
             "location": "starboard #5 / front #0 (top)",
             "layout": "2x1 (starboard), 2x3 (front)",
@@ -132,7 +132,7 @@
         },
         {
             "type": "fadecandy",
-            "serial": "???",
+            "serial": "ZBNJWGKGHVCJILMD",
             "led": false,
             "location": "front #1 (middle)",
             "layout": "2x4",
@@ -152,7 +152,7 @@
         },
         {
             "type": "fadecandy",
-            "serial": "???",
+            "serial": "SGWYRXOANLUBSZAZ",
             "led": false,
             "location": "front #2 (bottom)",
             "layout": "2x4",

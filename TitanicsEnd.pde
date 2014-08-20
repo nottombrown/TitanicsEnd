@@ -59,6 +59,7 @@ void setup() {
   
   // Patterns
   lx.setPatterns(patterns = new LXPattern[] {
+    new Dance(lx),
     new Grow(lx),
     new HyperCube(lx),
     new Logo(lx),
@@ -180,7 +181,7 @@ void setup() {
   lx.ui.addLayer(new UIEffect(lx.ui, heartbeat, width - 144, 4));
   lx.engine.setThreaded(false);
   
-  lx.tempo.bpm.setValue(60);
+  lx.tempo.bpm.setValue(120);
 }
 
 // Respond to OSC Events
