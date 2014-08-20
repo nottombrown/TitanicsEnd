@@ -19,17 +19,6 @@ class Heartbeat extends LXEffect {
   PGraphics g;
   
   PImage heart;
-  float[] xZoomTargets;
-  float[] yZoomTargets;
-  float[] targetZooms;
-  float[] maxZooms;
-   
-  float xTranslate = 0;
-  float yTranslate = 0;
-
-  float xTranslateStart = 0;
-  float yTranslateStart = 0;
-  
   color backgroundColor;
   
   BasicParameter minSize = new BasicParameter("SIZE", 0.09, 0, 0.2);
