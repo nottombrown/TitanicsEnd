@@ -27,63 +27,63 @@ static class Model extends LXModel {
     public static final int NUM_PORT_BACK_STRIPS = 12;
     public static final int NUM_PORT_STRIP_LOCATIONS = NUM_PORT_SIDE_STRIPS + NUM_PORT_BACK_STRIPS;
 
-    public static final int NUM_STARBOARD_SIDE_STRIPS = 23; // 4 skipped for ice cavern door
+    public static final int NUM_STARBOARD_SIDE_STRIPS = 20; // 4 skipped for ice cavern door
     public static final int NUM_STARBOARD_STRIP_LOCATIONS = NUM_STARBOARD_SIDE_STRIPS;
 
     private final List<LXModel> strips = new ArrayList<LXModel>();
 
     private static boolean portGap(int i) {
       // There's a gap for the driver's door
-      return i >= 0 && i <= 3;
+      return false;//i >= 0 && i <= 3;
     }
 
     private static boolean starboardGap(int i) {
       // There's a gap for the stairs and ice-cavern entrance
-      return i >= 0 && i <= 3;
+      return false; //i >= 0 && i <= 3;
     }
-    
+
     Fixture() {
       // Build an array of strips, from left to right, some will be skipped to make a gap
       LXModel strip;
-      
-      // Starboard side 
+
+      // Starboard side
       for (int i = 0; i < NUM_STARBOARD_STRIP_LOCATIONS; ++i) {
         if (!starboardGap(i)) {
-          strip = new VerticalStrip(0, (NUM_PORT_BACK_STRIPS + i)*STRIP_SPACING);
+          strip = new VerticalStrip(0, (4 + NUM_PORT_BACK_STRIPS + i)*STRIP_SPACING);
           strips.add(strip);
           addPoints(strip);
         }
       }
 
       for (int i = 0; i < 4; i++) {
-        strip = new VerticalHalfStrip(0, (NUM_PORT_BACK_STRIPS + NUM_STARBOARD_STRIP_LOCATIONS + i)*STRIP_SPACING);
+        strip = new VerticalHalfStrip(0, (NUM_PORT_BACK_STRIPS + 4 + NUM_STARBOARD_STRIP_LOCATIONS + i)*STRIP_SPACING);
         strips.add(strip);
         addPoints(strip);
       }
 
       // Front of the car
-      for (int i = 0; i < 3; i++) {
-        strip = new HorizontalStrip((NUM_PORT_BACK_STRIPS + NUM_STARBOARD_STRIP_LOCATIONS + 4)*STRIP_SPACING, (11 - i)*STRIP_SPACING, 0);
+      for (int i = 0; i < 2; i++) {
+        strip = new HorizontalStrip((NUM_PORT_BACK_STRIPS + 4 + NUM_STARBOARD_STRIP_LOCATIONS + 4)*STRIP_SPACING, (11 - i)*STRIP_SPACING, 0);
         strips.add(strip);
         addPoints(strip);
       }
 
       for (int i = 0; i < 4; i++) {
-        strip = new HorizontalStrip((NUM_PORT_BACK_STRIPS + NUM_STARBOARD_STRIP_LOCATIONS + 4)*STRIP_SPACING, (5 - i / 2.)*STRIP_SPACING, 0);
+        strip = new HorizontalStrip((NUM_PORT_BACK_STRIPS + 4 + NUM_STARBOARD_STRIP_LOCATIONS + 4)*STRIP_SPACING, (5 - i / 2.)*STRIP_SPACING, 0);
         strips.add(strip);
         addPoints(strip);
       }
 
       for (int i = 0; i < 4; i++) {
-        strip = new HorizontalStrip((NUM_PORT_BACK_STRIPS + NUM_STARBOARD_STRIP_LOCATIONS + 4)*STRIP_SPACING, (3 - i)*STRIP_SPACING, 0);
+        strip = new HorizontalStrip((NUM_PORT_BACK_STRIPS + 4 + NUM_STARBOARD_STRIP_LOCATIONS + 4)*STRIP_SPACING, (3 - i)*STRIP_SPACING, 0);
         strips.add(strip);
         addPoints(strip);
       }
-      
+
       // Port & rear side
       for (int i = 0; i < NUM_PORT_STRIP_LOCATIONS; ++i) {
         if (!portGap(i)) {
-          strip = new VerticalStrip(9*FEET, (NUM_PORT_STRIP_LOCATIONS - 1 - i)*STRIP_SPACING);
+          strip = new VerticalStrip(9*FEET, (NUM_PORT_STRIP_LOCATIONS - i)*STRIP_SPACING);
           strips.add(strip);
           addPoints(strip);
         }
@@ -110,7 +110,7 @@ static class VerticalStrip extends LXModel {
   private static class Fixture extends LXAbstractFixture {
     Fixture(float z, float x) {
       /**
-       * Points in each strip are mapped in two sections: 
+       * Points in each strip are mapped in two sections:
        * - the first half are added middle to top
        * - the second half are added middle to bottom
        */
@@ -172,7 +172,7 @@ static class HorizontalStrip extends LXModel {
   private static class Fixture extends LXAbstractFixture {
     Fixture(float x, float y, float z) {
       /**
-       * Points in each strip are mapped in two sections: 
+       * Points in each strip are mapped in two sections:
        * - the first half are added middle to left
        * - the second half are added middle to right
        * NOTE: depending on the strips, this may need to be flipped
