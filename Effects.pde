@@ -21,7 +21,7 @@ class Heartbeat extends LXEffect {
   PImage heart;
   color backgroundColor;
   
-  BasicParameter minSize = new BasicParameter("SIZE", 0.09, 0, 0.2);
+  BasicParameter minSize = new BasicParameter("SIZE", 0.08, 0, 0.2);
   BasicParameter pulseDelta = new BasicParameter("PULSE", 1, 0, 10);
   
   Heartbeat(LX lx) {
@@ -29,6 +29,7 @@ class Heartbeat extends LXEffect {
     
     addParameter(minSize);
     addParameter(pulseDelta);
+    addParameter(amulet.heartDecay);
     
     heart = new PImage();
     heart = loadImage("images/heart.png");
@@ -36,10 +37,13 @@ class Heartbeat extends LXEffect {
     
     g = createGraphics(int(model.xRange), int(model.yRange));
   }
-
+  
+  float getBeatZoom() {
+    return constrain(eq.getAveragef(1, 10)*pulseDelta.getValuef() + 1, 1., 1.5);
+  } 
   PImage drawImage() {
-    float beatZoom = constrain(eq.getAveragef(1, 10)*pulseDelta.getValuef() + 1, 1., 1.5); 
-    float zoom = beatZoom * minSize.getValuef();
+    
+    float zoom = getBeatZoom() * minSize.getValuef();
     
     g.imageMode(CENTER);
     g.beginDraw();
@@ -54,44 +58,47 @@ class Heartbeat extends LXEffect {
     return g.get();
   }
 
-  float zoomSpeed = 1.02;
-
-  void update() {
+  void drawPulsingHeart() {  
+    PImage img = drawImage();
+    for (LXPoint p : model.points) {
+      int ix, iy;
+      if (p.z > 0) {
+        ix = int((model.xRange - p.x - 10*FEET) / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      else {
+        ix = int(p.x / model.xRange * img.width); 
+        iy = int(p.y / model.yRange * img.height); 
+      }
+      int imageColor = img.get(ix, iy);
+      int origColor = colors[p.index];      
+      if (LXColor.b(imageColor) > 50) {
+        colors[p.index] = LXColor.lerp(
+        colors[p.index], 
+        LXColor.hsb(0,0,100), 
+        constrain(amulet.heartPower*3*getBeatZoom(),0,1)
+      );
+      }
+    }
+  }
+  void drawFlash() {
+    
+    // Flash of white that quickly fades
+    for (LXPoint p : model.points) {
+      colors[p.index] = LXColor.lerp(
+        colors[p.index], 
+        LXColor.hsb(0,0,100), 
+        constrain(amulet.heartPower*3-2,0,1)
+      );
+    }
   }
 
   public void run(double deltaMs) {
-    
-    amulet.loop(deltaMs);
-    
-    if (amulet.heart.getValuef() > 0.5){
-      update();
-      
-      
-      PImage img = drawImage();
-      
-      for (LXPoint p : model.points) {
-        int ix, iy;
-        if (p.z > 0) {
-          ix = int((model.xRange - p.x - 5*FEET) / model.xRange * img.width); 
-          iy = int(p.y / model.yRange * img.height); 
-        }
-        else {
-          ix = int(p.x / model.xRange * img.width); 
-          iy = int(p.y / model.yRange * img.height); 
-        }
-        int imageColor = img.get(ix, iy);
-        int origColor = colors[p.index];
-        float[] origHSB = LXColor.RGBtoHSB(origColor, null);
-        
-        // Invert the hues when the heart is on
-        if (LXColor.b(imageColor) > 50) {
-          colors[p.index] = LXColor.hsb(
-            -LXColor.h(origColor),
-            LXColor.s(origColor),
-            LXColor.b(origColor)
-          );
-        }
-      }
+    amulet.runHeartLoop(deltaMs);
+    if (amulet.heartIsOn()) {
+      drawFlash();
+     
+      drawPulsingHeart(); 
     }
   }
 }

@@ -6,11 +6,15 @@ class Amulet {
   Amulet() { } 
   
   void setup() {
-    heartPower = 0.0
-    heartDecay = new BasicParameter("DECAY", 0.02, 0, 0.1);
+    heartPower = 0.0;
+    heartDecay = new BasicParameter("DECAY", 0.03, 0, 0.1);
   } 
-  void loop(double deltaMS) {
-     heart.setValue(heart.getValuef()-heartDecay.getValuef());
+  
+  void runHeartLoop(double deltaMS) {
+     heartPower -= constrain(heartDecay.getValuef(), 0,1);
+  }
+  boolean heartIsOn(){
+    return heartPower > 0;
   }
 }
 
@@ -23,7 +27,7 @@ void keyPressed() {
     println("hit left");
   } 
   if(keyCode == 66) {
-    amulet.heartPower = 1.0
+    amulet.heartPower = 1.0;
   }
 }
 
