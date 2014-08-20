@@ -59,6 +59,12 @@ void setup() {
   
   // Patterns
   lx.setPatterns(patterns = new LXPattern[] {
+    
+    
+    new BlockRandom(lx),
+    new BlockSpiral(lx),
+    new BlockShift(lx),
+
     new Dance(lx),
     new Grow(lx),
     new HyperCube(lx),
