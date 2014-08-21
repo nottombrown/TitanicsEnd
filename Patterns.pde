@@ -2167,5 +2167,3 @@ class BlockSpiral extends BlockBase {
     );
   }
 }
-
-

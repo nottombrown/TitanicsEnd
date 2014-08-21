@@ -93,7 +93,7 @@
             "serial": "EKDNEGBLFPCXYZWL",
             "led": false,
             "location": "starboard #4",
-            "layout": "3x2, 2x1",
+            "layout": "3x2, 2x1 (cut)",
             "map": [
                 [ 0, 1600, 0, 50 ],
                 [ 0, 1650, 256, 50 ],
@@ -115,7 +115,7 @@
             "serial": "UYSSAOWWPFYZCJMP",
             "led": false,
             "location": "starboard #5 / front #0 (top)",
-            "layout": "2x1 (starboard), 2x3 (front)",
+            "layout": "2x1 (starboard), 2x2 (front)",
             "map": [
                 [ 0, 2000, 0, 50 ],
                 [ 0, 2050, 256, 50 ],
