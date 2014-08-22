@@ -20,14 +20,27 @@ class Amulet {
 
 void keyPressed() {
   println(keyCode);
-  if (keyCode == 34) {
-    println("hit right");
-  } 
-  if (keyCode == 33) {
-    println("hit left");
-  } 
-  if(keyCode == 66) {
+
+  switch (keyCode) {
+  case 27:
+  case 116:
+    // TODO
+    break;
+
+  case 33: // left
+    lx.goPrev();
+    break;
+
+  case 34: // right
+    lx.goNext();
+    break;
+
+  case 66: // b
     amulet.heartPower = 1.0;
+    //lx.goNext();
+    break;
   }
+
+  if (key == ESC) key = 0; // trap ESC so it doesn't quit
 }
 
