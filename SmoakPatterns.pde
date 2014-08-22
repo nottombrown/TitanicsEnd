@@ -5,13 +5,8 @@ class BeatHelpers {
     float bri = brightness(in);
     float toAdd = eq.getAveragef(1, 4) * mult;
     if (toAdd > 100 - bri) {
-      if (bri == 0) {  // assume this is meant as black -- don't turn it into red
-        bri = 100;
-      }
-      else {
-        bri = 100;
-        sat -= toAdd - (100 - bri);
-      }
+      sat -= toAdd - (100 - bri);
+      bri = 100;
     }
     else {
       bri += toAdd;
